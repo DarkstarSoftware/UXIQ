@@ -11,35 +11,18 @@ body {
   background: #0b0f19;
 }
 
-.container-shell {
-  width: 100%;
-  max-width: 80rem;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-}
-
-@media (min-width: 768px) {
+@layer components {
   .container-shell {
-    padding-left: 2rem;
-    padding-right: 2rem;
+    @apply mx-auto w-full max-w-7xl px-5 md:px-8;
   }
-}
 
-.card {
-  border-radius: 1rem;
-  border: 1px solid rgb(31 41 55);
-  background: rgb(17 24 39);
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.2),
-    0 8px 10px -6px rgb(0 0 0 / 0.2);
-}
+  .card {
+    @apply rounded-2xl border border-ui-border bg-ui-card shadow-xl shadow-black/20;
+  }
 
-.section-title {
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-  font-weight: 600;
-  color: white;
+  .section-title {
+    @apply text-lg font-semibold text-white;
+  }
 }
 
 @media print {
@@ -55,8 +38,5 @@ body {
 
   .card {
     break-inside: avoid;
-    border: 1px solid #e5e7eb !important;
-    background: white !important;
-    box-shadow: none !important;
   }
 }
