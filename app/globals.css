@@ -49,8 +49,7 @@ body {
 
   aside,
   nav,
-  button,
-  .print\\:hidden {
+  button {
     display: none !important;
   }
 
