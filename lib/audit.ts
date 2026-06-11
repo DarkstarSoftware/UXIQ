@@ -1,9 +1,8 @@
-export type Plan = 'free' | 'pro' | 'agency';
-export type CategoryName = 'Usability' | 'Accessibility' | 'Conversion' | 'Visual Design';
 export type Severity = 'High' | 'Medium' | 'Low';
+export type Plan = 'free' | 'pro';
 
 export type CategoryScore = {
-  name: CategoryName;
+  name: 'Usability' | 'Accessibility' | 'Conversion' | 'Visual Design';
   score: number;
   insight: string;
 };
@@ -22,6 +21,7 @@ export type Fix = {
 };
 
 export type AuditResult = {
+  id?: string;
   url: string;
   normalizedUrl: string;
   score: number;
@@ -32,10 +32,15 @@ export type AuditResult = {
   source: 'basic' | 'openai' | 'fallback';
   plan: Plan;
   note?: string;
-  locked?: {
-    title: string;
-    body: string;
-    features: string[];
+  snapshot?: {
+    title?: string;
+    metaDescription?: string;
+    h1?: string[];
+    h2?: string[];
+    buttonCount?: number;
+    formCount?: number;
+    inputCount?: number;
+    imageCount?: number;
+    linkCount?: number;
   };
-  snapshot?: Record<string, unknown>;
 };

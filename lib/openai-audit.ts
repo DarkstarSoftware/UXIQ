@@ -1,14 +1,20 @@
 import OpenAI from 'openai';
-import type { AuditResult, CategoryScore, Fix, Issue, Plan } from '@/lib/audit';
+import type { AuditResult, CategoryScore, Fix, Issue } from '@/lib/audit';
 import type { SiteSnapshot } from '@/lib/site-snapshot';
 
 const DEFAULT_MODEL = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
-const OPENAI_TIMEOUT_MS = 15000;
+const OPENAI_TIMEOUT_MS = 18000;
 
 type ParsedCategory = { name?: unknown; score?: unknown; insight?: unknown };
 type ParsedIssue = { severity?: unknown; title?: unknown; body?: unknown };
 type ParsedFix = { title?: unknown; impact?: unknown; effort?: unknown; description?: unknown };
-type ParsedAudit = { score?: unknown; summary?: unknown; categories?: ParsedCategory[]; issues?: ParsedIssue[]; fixes?: ParsedFix[] };
+type ParsedAudit = {
+  score?: unknown;
+  summary?: unknown;
+  categories?: ParsedCategory[];
+  issues?: ParsedIssue[];
+  fixes?: ParsedFix[];
+};
 
 function clampScore(value: unknown, fallback = 60) {
   const num = typeof value === 'number' ? value : Number(value);
@@ -31,6 +37,20 @@ function normalizeSeverity(value: unknown): Issue['severity'] {
   return 'Medium';
 }
 
+function normalizeImpact(value: unknown): Fix['impact'] {
+  const str = String(value || '').toLowerCase();
+  if (str.includes('high')) return 'High';
+  if (str.includes('low')) return 'Low';
+  return 'Medium';
+}
+
+function normalizeEffort(value: unknown): Fix['effort'] {
+  const str = String(value || '').toLowerCase();
+  if (str.includes('low')) return 'Low';
+  if (str.includes('high')) return 'High';
+  return 'Medium';
+}
+
 function parseJsonObject(content: string): ParsedAudit {
   const start = content.indexOf('{');
   const end = content.lastIndexOf('}');
@@ -41,16 +61,23 @@ function parseJsonObject(content: string): ParsedAudit {
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise((resolve, reject) => {
     const id = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
-    promise.then((value) => { clearTimeout(id); resolve(value); }).catch((err) => { clearTimeout(id); reject(err); });
+    promise.then((value) => {
+      clearTimeout(id);
+      resolve(value);
+    }).catch((err) => {
+      clearTimeout(id);
+      reject(err);
+    });
   });
 }
 
-export async function generateAuditWithOpenAI(snapshot: SiteSnapshot, plan: Plan): Promise<AuditResult> {
+export async function generateAuditWithOpenAI(snapshot: SiteSnapshot): Promise<AuditResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) throw new Error('OPENAI_API_KEY is not set.');
 
   const client = new OpenAI({ apiKey });
-  const prompt = `You are an expert senior UX auditor. Analyze this website snapshot using Nielsen Norman-inspired usability principles, WCAG-aware accessibility thinking, conversion best practices, and visual consistency. Return ONLY valid JSON.
+
+  const prompt = `You are an expert senior UX auditor for Darkstar Audit AI. Analyze this website snapshot using Nielsen Norman usability principles, WCAG 2.2 AA-aware accessibility thinking, conversion best practices, and visual consistency. Return ONLY valid JSON.
 
 Required JSON shape:
 {
@@ -62,34 +89,22 @@ Required JSON shape:
     {"name":"Conversion","score": number,"insight": string},
     {"name":"Visual Design","score": number,"insight": string}
   ],
-  "issues": [
-    {"severity":"High|Medium|Low","title": string,"body": string}
-  ],
-  "fixes": [
-    {"title": string,"impact":"High|Medium|Low","effort":"Low|Medium|High","description": string}
-  ]
+  "issues": [{"severity":"High|Medium|Low","title": string,"body": string}],
+  "fixes": [{"title": string,"impact":"High|Medium|Low","effort":"Low|Medium|High","description": string}]
 }
 
-Rules:
-- Be concrete and specific to the snapshot.
-- Mention probable issues only when supported by the snapshot.
-- Keep summary under 110 characters.
-- Return exactly 4 categories, 4 issues, and 3 fixes.
-- Scores should feel realistic for the evidence.
-- Do not include markdown fences.
+Return exactly 4 categories, 4 issues, and 3 fixes. Do not include markdown.
 
 Website URL: ${snapshot.normalizedUrl}
 Title: ${snapshot.title || 'N/A'}
 Meta description: ${snapshot.metaDescription || 'N/A'}
 H1: ${snapshot.h1.join(' | ') || 'N/A'}
 H2: ${snapshot.h2.join(' | ') || 'N/A'}
-Counts:
-- Buttons: ${snapshot.buttonCount}
-- Forms: ${snapshot.formCount}
-- Inputs: ${snapshot.inputCount}
-- Images: ${snapshot.imageCount}
-- Images missing alt: ${snapshot.missingAltCount}
-- Links: ${snapshot.linkCount}
+Buttons: ${snapshot.buttonCount}
+Forms: ${snapshot.formCount}
+Inputs: ${snapshot.inputCount}
+Images: ${snapshot.imageCount}
+Links: ${snapshot.linkCount}
 
 Visible text excerpt:
 ${snapshot.textExcerpt}
@@ -100,7 +115,7 @@ ${snapshot.htmlExcerpt}`;
   const response = await withTimeout(
     client.chat.completions.create({
       model: DEFAULT_MODEL,
-      temperature: 0.3,
+      temperature: 0.25,
       messages: [
         { role: 'system', content: 'You are a precise UX auditor who outputs only JSON.' },
         { role: 'user', content: prompt },
@@ -113,35 +128,41 @@ ${snapshot.htmlExcerpt}`;
   const raw = response.choices[0]?.message?.content ?? '';
   const parsed = parseJsonObject(raw);
 
-  const categories: CategoryScore[] = (Array.isArray(parsed.categories) ? parsed.categories : []).slice(0, 4).map((item) => ({
-    name: normalizeCategoryName(item.name),
-    score: clampScore(item.score),
-    insight: String(item.insight || ''),
-  }));
+  const categories: CategoryScore[] = (Array.isArray(parsed.categories) ? parsed.categories : [])
+    .slice(0, 4)
+    .map((item: ParsedCategory): CategoryScore => ({
+      name: normalizeCategoryName(item.name),
+      score: clampScore(item.score),
+      insight: String(item.insight || ''),
+    }));
 
-  const issues: Issue[] = (Array.isArray(parsed.issues) ? parsed.issues : []).slice(0, 4).map((item) => ({
-    severity: normalizeSeverity(item.severity),
-    title: String(item.title || 'Issue'),
-    body: String(item.body || ''),
-  }));
+  const issues: Issue[] = (Array.isArray(parsed.issues) ? parsed.issues : [])
+    .slice(0, 4)
+    .map((item: ParsedIssue): Issue => ({
+      severity: normalizeSeverity(item.severity),
+      title: String(item.title || 'Issue'),
+      body: String(item.body || ''),
+    }));
 
-  const fixes: Fix[] = (Array.isArray(parsed.fixes) ? parsed.fixes : []).slice(0, 3).map((item) => ({
-    title: String(item.title || 'Recommended fix'),
-    impact: normalizeSeverity(item.impact),
-    effort: normalizeSeverity(item.effort),
-    description: String(item.description || ''),
-  }));
+  const fixes: Fix[] = (Array.isArray(parsed.fixes) ? parsed.fixes : [])
+    .slice(0, 3)
+    .map((item: ParsedFix): Fix => ({
+      title: String(item.title || 'Recommended fix'),
+      impact: normalizeImpact(item.impact),
+      effort: normalizeEffort(item.effort),
+      description: String(item.description || ''),
+    }));
 
   return {
-    url: snapshot.url,
+    url: snapshot.normalizedUrl,
     normalizedUrl: snapshot.normalizedUrl,
     score: clampScore(parsed.score),
-    summary: String(parsed.summary || 'AI audit complete.'),
+    summary: String(parsed.summary || 'Audit complete.'),
     categories,
     issues,
     fixes,
     source: 'openai',
-    plan,
+    plan: 'pro',
     snapshot: {
       title: snapshot.title,
       metaDescription: snapshot.metaDescription,
@@ -151,7 +172,6 @@ ${snapshot.htmlExcerpt}`;
       formCount: snapshot.formCount,
       inputCount: snapshot.inputCount,
       imageCount: snapshot.imageCount,
-      missingAltCount: snapshot.missingAltCount,
       linkCount: snapshot.linkCount,
     },
   };

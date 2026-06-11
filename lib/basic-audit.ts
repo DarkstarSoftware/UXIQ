@@ -1,56 +1,93 @@
-import type { AuditResult, CategoryScore, Fix, Issue } from '@/lib/audit';
+import type { AuditResult } from '@/lib/audit';
 import type { SiteSnapshot } from '@/lib/site-snapshot';
 
-function clamp(value: number) { return Math.max(0, Math.min(100, Math.round(value))); }
+function scoreFromSnapshot(snapshot: SiteSnapshot) {
+  let score = 74;
 
-export function generateBasicAudit(snapshot: SiteSnapshot, plan: 'free' | 'pro' | 'agency' = 'free'): AuditResult {
-  const hasH1 = snapshot.h1.length > 0;
-  const hasMeta = snapshot.metaDescription.length > 0;
-  const hasButtons = snapshot.buttonCount > 0;
-  const missingAltRatio = snapshot.imageCount ? snapshot.missingAltCount / snapshot.imageCount : 0;
-  const hasFormFriction = snapshot.inputCount > 5;
+  if (!snapshot.title) score -= 8;
+  if (!snapshot.metaDescription) score -= 6;
+  if (snapshot.h1.length === 0) score -= 12;
+  if (snapshot.buttonCount === 0) score -= 12;
+  if (snapshot.inputCount > 5) score -= 6;
+  if (snapshot.linkCount > 100) score -= 5;
 
-  const usability = clamp(70 + (hasH1 ? 8 : -12) + (snapshot.linkCount > 80 ? -8 : 4));
-  const accessibility = clamp(76 + (missingAltRatio > 0.3 ? -18 : 6) + (snapshot.inputCount && snapshot.formCount ? -4 : 2));
-  const conversion = clamp(68 + (hasButtons ? 10 : -14) + (hasMeta ? 4 : -4) + (hasFormFriction ? -10 : 2));
-  const visual = clamp(74 + (snapshot.h2.length > 1 ? 6 : -4));
-  const score = clamp((usability + accessibility + conversion + visual) / 4);
+  return Math.max(42, Math.min(92, score));
+}
 
-  const categories: CategoryScore[] = [
-    { name: 'Usability', score: usability, insight: hasH1 ? 'Basic page structure is detectable.' : 'No clear H1 was detected.' },
-    { name: 'Accessibility', score: accessibility, insight: 'Basic WCAG-aware checks reviewed headings, forms, and image alt coverage.' },
-    { name: 'Conversion', score: conversion, insight: hasButtons ? 'Primary action elements are present.' : 'No obvious CTA button was detected.' },
-    { name: 'Visual Design', score: visual, insight: 'Basic structure and content hierarchy were reviewed.' },
-  ];
-
-  const issues: Issue[] = [
-    { severity: hasButtons ? 'Medium' : 'High', title: hasButtons ? 'CTA hierarchy should be reviewed' : 'No obvious CTA detected', body: 'Free audits identify basic conversion signals only. Upgrade for AI-backed page-specific prioritization.' },
-    { severity: missingAltRatio > 0.3 ? 'High' : 'Medium', title: 'Accessibility basics need validation', body: 'Review WCAG basics including alt text, contrast, labels, headings, keyboard access, and focus states.' },
-    { severity: hasH1 ? 'Low' : 'Medium', title: 'Information architecture should be checked', body: 'Nielsen Norman-inspired review suggests verifying clarity, recognition over recall, and content hierarchy.' },
-  ];
-
-  const fixes: Fix[] = [
-    { title: 'Clarify the primary action', impact: 'High', effort: 'Low', description: 'Make the next step obvious above the fold and reduce competing actions.' },
-    { title: 'Run WCAG checks', impact: 'High', effort: 'Medium', description: 'Validate contrast, headings, labels, alt text, keyboard navigation, and focus states.' },
-  ];
+export function generateBasicAudit(snapshot: SiteSnapshot): AuditResult {
+  const score = scoreFromSnapshot(snapshot);
 
   return {
-    url: snapshot.url,
+    url: snapshot.normalizedUrl,
     normalizedUrl: snapshot.normalizedUrl,
     score,
-    summary: 'Basic UX snapshot generated.',
-    categories,
-    issues,
-    fixes,
+    summary: 'Basic UX, WCAG-aware, and heuristic review complete.',
     source: 'basic',
-    plan,
-    locked: {
-      title: 'Unlock the full AI audit',
-      body: 'Paid users receive deeper AI-generated findings, prioritized fixes, conversion impact, competitor insights, and page-specific recommendations.',
-      features: ['Full AI analysis', 'Prioritized fixes', 'Conversion impact'],
-    },
+    plan: 'free',
+    categories: [
+      {
+        name: 'Usability',
+        score: snapshot.h1.length ? 72 : 58,
+        insight: 'Reviewed using Nielsen Norman-inspired usability principles.',
+      },
+      {
+        name: 'Accessibility',
+        score: snapshot.inputCount > 0 ? 64 : 70,
+        insight: 'Basic WCAG-aware checks reviewed for structure and form complexity.',
+      },
+      {
+        name: 'Conversion',
+        score: snapshot.buttonCount > 0 ? 68 : 52,
+        insight: 'Basic CTA and conversion path clarity reviewed.',
+      },
+      {
+        name: 'Visual Design',
+        score: 72,
+        insight: 'Basic hierarchy and content structure reviewed from page markup.',
+      },
+    ],
+    issues: [
+      {
+        severity: snapshot.h1.length ? 'Medium' : 'High',
+        title: snapshot.h1.length ? 'Heading structure should be verified' : 'No H1 detected',
+        body: snapshot.h1.length
+          ? 'The page has a primary heading, but a full review should verify hierarchy and scanability.'
+          : 'A missing H1 can reduce clarity for users, assistive technology, and search engines.',
+      },
+      {
+        severity: snapshot.buttonCount > 0 ? 'Medium' : 'High',
+        title: 'Primary action clarity requires review',
+        body: 'Free audits identify basic CTA presence. Upgrade for AI analysis of hierarchy, placement, and conversion friction.',
+      },
+      {
+        severity: 'Medium',
+        title: 'WCAG review is limited on free plan',
+        body: 'The free plan provides basic accessibility observations. Upgrade for deeper WCAG 2.2 AA-oriented recommendations.',
+      },
+    ],
+    fixes: [
+      {
+        title: 'Verify primary page hierarchy',
+        impact: 'Medium',
+        effort: 'Low',
+        description: 'Ensure the page has one clear H1 and a logical heading structure.',
+      },
+      {
+        title: 'Clarify the main call to action',
+        impact: 'High',
+        effort: 'Medium',
+        description: 'Make the most important user action visually dominant and easy to identify.',
+      },
+      {
+        title: 'Upgrade for full AI report',
+        impact: 'High',
+        effort: 'Low',
+        description: 'Full AI reports include deeper UX, WCAG, and conversion recommendations.',
+      },
+    ],
     snapshot: {
       title: snapshot.title,
+      metaDescription: snapshot.metaDescription,
       h1: snapshot.h1,
       h2: snapshot.h2,
       buttonCount: snapshot.buttonCount,
@@ -58,7 +95,6 @@ export function generateBasicAudit(snapshot: SiteSnapshot, plan: 'free' | 'pro' 
       inputCount: snapshot.inputCount,
       imageCount: snapshot.imageCount,
       linkCount: snapshot.linkCount,
-      missingAltCount: snapshot.missingAltCount,
     },
   };
 }

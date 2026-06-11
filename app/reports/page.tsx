@@ -1,21 +1,37 @@
+import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/layout/app-shell';
-import { reports } from '@/lib/mock-data';
+import { formatDate } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/server';
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login?redirect=/reports');
+
+  const { data: reports } = await supabase
+    .from('audit_reports')
+    .select('id, normalized_url, score, summary, source, plan, created_at')
+    .order('created_at', { ascending: false })
+    .limit(50);
+
   return (
-    <AppShell title="Reports" subtitle="Review saved audits and track UX improvement over time">
-      <div className="card overflow-hidden">
-        <div className="grid grid-cols-[1.2fr_.5fr_.8fr_.8fr] border-b border-ui-border px-6 py-4 text-sm font-semibold text-ui-muted">
-          <span>Website</span><span>Score</span><span>Date</span><span>Status</span>
+    <AppShell title="Reports" subtitle="Review saved audits and historical website scores">
+      <div className="card p-6">
+        <h2 className="section-title">Audit History</h2>
+        <div className="mt-6 space-y-3">
+          {(reports ?? []).length === 0 ? (
+            <p className="text-sm text-ui-muted">No reports yet. Run your first audit from the dashboard.</p>
+          ) : (
+            reports?.map((report) => (
+              <div key={report.id} className="grid gap-4 rounded-xl border border-ui-border bg-ui-surface/60 p-4 md:grid-cols-[1fr_auto_auto_auto]">
+                <div><p className="font-medium text-white">{report.normalized_url}</p><p className="mt-1 text-sm text-ui-muted">{report.summary}</p></div>
+                <p className="text-3xl font-semibold text-white">{report.score}</p>
+                <p className="text-sm capitalize text-ui-muted">{report.plan}</p>
+                <p className="text-sm text-ui-muted">{formatDate(report.created_at)}</p>
+              </div>
+            ))
+          )}
         </div>
-        {reports.map((report) => (
-          <div key={report.site} className="grid grid-cols-[1.2fr_.5fr_.8fr_.8fr] border-b border-ui-border/60 px-6 py-5 text-sm last:border-0">
-            <span className="font-medium text-white">{report.site}</span>
-            <span className="text-white">{report.score}</span>
-            <span className="text-ui-muted">{report.date}</span>
-            <span className="text-ui-muted">{report.status}</span>
-          </div>
-        ))}
       </div>
     </AppShell>
   );

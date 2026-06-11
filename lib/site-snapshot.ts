@@ -1,7 +1,7 @@
 import { load } from 'cheerio';
 
 export type SiteSnapshot = {
-  url: string;
+  requestedUrl: string;
   normalizedUrl: string;
   title: string;
   metaDescription: string;
@@ -12,66 +12,86 @@ export type SiteSnapshot = {
   inputCount: number;
   imageCount: number;
   linkCount: number;
-  missingAltCount: number;
   textExcerpt: string;
   htmlExcerpt: string;
 };
 
-const FETCH_TIMEOUT_MS = 8000;
+const FETCH_TIMEOUT_MS = 9000;
 
 export function normalizeUrl(rawUrl: string) {
-  const trimmed = rawUrl.trim();
-  if (!trimmed) throw new Error('URL is required.');
-  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  const value = rawUrl.trim();
+
+  if (!value) {
+    throw new Error('A website URL is required.');
+  }
+
+  if (value.startsWith('http://') || value.startsWith('https://')) {
+    return value;
+  }
+
+  return `https://${value}`;
 }
 
-export async function fetchSiteSnapshot(rawUrl: string): Promise<SiteSnapshot> {
-  const normalizedUrl = normalizeUrl(rawUrl);
+async function fetchWithTimeout(url: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
-    const response = await fetch(normalizedUrl, {
+    const response = await fetch(url, {
       signal: controller.signal,
       redirect: 'follow',
       headers: {
-        'User-Agent': 'Mozilla/5.0 UX Audit Bot',
-        Accept: 'text/html,application/xhtml+xml',
+        'User-Agent': 'Mozilla/5.0 Darkstar Audit AI',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
     });
 
-    if (!response.ok) throw new Error(`Website returned ${response.status}.`);
+    if (!response.ok) {
+      throw new Error(`Website responded with status ${response.status}.`);
+    }
 
-    const html = await response.text();
-    const $ = load(html);
-    $('script, style, noscript, svg').remove();
-
-    const text = $('body').text().replace(/\s+/g, ' ').trim();
-    const h1 = $('h1').map((_, el) => $(el).text().replace(/\s+/g, ' ').trim()).get().filter(Boolean).slice(0, 6);
-    const h2 = $('h2').map((_, el) => $(el).text().replace(/\s+/g, ' ').trim()).get().filter(Boolean).slice(0, 8);
-    const imageCount = $('img').length;
-    const missingAltCount = $('img').filter((_, el) => !($(el).attr('alt') || '').trim()).length;
-
-    return {
-      url: rawUrl,
-      normalizedUrl,
-      title: $('title').first().text().trim(),
-      metaDescription: $('meta[name="description"]').attr('content') || '',
-      h1,
-      h2,
-      buttonCount: $('button, a[role="button"], input[type="button"], input[type="submit"]').length,
-      formCount: $('form').length,
-      inputCount: $('input, textarea, select').length,
-      imageCount,
-      linkCount: $('a').length,
-      missingAltCount,
-      textExcerpt: text.slice(0, 2200),
-      htmlExcerpt: html.replace(/\s+/g, ' ').slice(0, 3000),
-    };
-  } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') throw new Error('Website fetch timed out.');
-    throw error;
+    return await response.text();
   } finally {
     clearTimeout(timeout);
   }
+}
+
+export async function fetchSiteSnapshot(normalizedUrl: string): Promise<SiteSnapshot> {
+  const html = await fetchWithTimeout(normalizedUrl);
+  const $ = load(html);
+
+  $('script, style, noscript, svg').remove();
+
+  const title = $('title').first().text().trim();
+  const metaDescription = $('meta[name="description"]').attr('content')?.trim() || '';
+
+  const h1 = $('h1')
+    .map((_, el) => $(el).text().replace(/\s+/g, ' ').trim())
+    .get()
+    .filter(Boolean)
+    .slice(0, 6);
+
+  const h2 = $('h2')
+    .map((_, el) => $(el).text().replace(/\s+/g, ' ').trim())
+    .get()
+    .filter(Boolean)
+    .slice(0, 10);
+
+  const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
+
+  return {
+    requestedUrl: normalizedUrl,
+    normalizedUrl,
+    title,
+    metaDescription,
+    h1,
+    h2,
+    buttonCount: $('button, a[role="button"], input[type="submit"]').length,
+    formCount: $('form').length,
+    inputCount: $('input, textarea, select').length,
+    imageCount: $('img').length,
+    linkCount: $('a').length,
+    textExcerpt: bodyText.slice(0, 3500),
+    htmlExcerpt: html.replace(/\s+/g, ' ').slice(0, 3500),
+  };
 }
