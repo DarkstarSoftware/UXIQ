@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { getBillingStatusLabel, getPlanLabel } from '@/lib/billing';
+import { UpgradeButton } from '@/components/billing/upgrade-button';
 
 export function BillingCard({
   plan,
@@ -35,9 +36,9 @@ export function BillingCard({
           <Button className="mt-5 w-full">Manage Billing</Button>
         </form>
       ) : (
-        <form action="/api/stripe/checkout" method="POST">
-          <Button className="mt-5 w-full">Upgrade to Pro</Button>
-        </form>
+       <div className="mt-5">
+  <UpgradeButton />
+</div>
       )}
     </div>
   );

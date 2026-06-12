@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Check } from 'lucide-react';
-
+import { UpgradeButton } from '@/components/billing/upgrade-button';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 
@@ -87,9 +87,9 @@ export default function PricingPage() {
                 </div>
 
                 {tier.featured ? (
-                  <form action="/api/stripe/checkout" method="POST">
-                    <Button className="mt-8 w-full">{tier.cta}</Button>
-                  </form>
+                 <div className="mt-8">
+  <UpgradeButton label="Start Pro" />
+</div>
                 ) : (
                   <Link href={tier.href}>
                     <Button variant="secondary" className="mt-8 w-full">
