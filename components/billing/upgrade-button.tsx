@@ -14,13 +14,20 @@ export function UpgradeButton({ label = 'Upgrade to Pro' }: { label?: string }) 
         method: 'POST',
       });
 
-      if (response.redirected) {
-        window.location.href = response.url;
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data?.error || 'Unable to open Stripe Checkout.');
+        setLoading(false);
         return;
       }
 
-      const data = await response.json().catch(() => null);
-      alert(data?.error || 'Unable to open Stripe Checkout.');
+      if (data?.url) {
+        window.location.href = data.url;
+        return;
+      }
+
+      alert('Stripe Checkout URL was not returned.');
     } catch {
       alert('Unable to open Stripe Checkout.');
     } finally {

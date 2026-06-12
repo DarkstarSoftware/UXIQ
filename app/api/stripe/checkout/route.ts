@@ -12,10 +12,7 @@ export async function POST() {
 
   if (!stripeSecretKey || !priceId || !siteUrl) {
     return NextResponse.json(
-      {
-        error:
-          'Stripe is not configured. Required: STRIPE_SECRET_KEY, STRIPE_PRO_PRICE_ID, NEXT_PUBLIC_SITE_URL.',
-      },
+      { error: 'Stripe is not configured.' },
       { status: 500 },
     );
   }
@@ -27,7 +24,10 @@ export async function POST() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(`${siteUrl}/auth/login?redirect=/pricing`);
+    return NextResponse.json(
+      { url: `${siteUrl}/auth/login?redirect=/pricing` },
+      { status: 200 },
+    );
   }
 
   const { data: profile } = await supabase
@@ -36,22 +36,13 @@ export async function POST() {
     .eq('id', user.id)
     .single();
 
-  if (profile?.plan === 'pro') {
-    return NextResponse.redirect(`${siteUrl}/settings`);
-  }
-
   const stripe = new Stripe(stripeSecretKey);
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     customer: profile?.stripe_customer_id || undefined,
     customer_email: profile?.stripe_customer_id ? undefined : user.email ?? undefined,
-    line_items: [
-      {
-        price: priceId,
-        quantity: 1,
-      },
-    ],
+    line_items: [{ price: priceId, quantity: 1 }],
     allow_promotion_codes: true,
     success_url: `${siteUrl}/dashboard?billing=success`,
     cancel_url: `${siteUrl}/pricing?billing=cancelled`,
@@ -65,12 +56,5 @@ export async function POST() {
     },
   });
 
-  if (!session.url) {
-    return NextResponse.json(
-      { error: 'Unable to create Stripe Checkout session.' },
-      { status: 500 },
-    );
-  }
-
-  return NextResponse.redirect(session.url, 303);
+  return NextResponse.json({ url: session.url });
 }
