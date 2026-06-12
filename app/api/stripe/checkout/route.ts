@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@/lib/supabase/server';
 
+export const runtime = 'nodejs';
+
 export async function POST() {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
   const priceId = process.env.STRIPE_PRO_PRICE_ID;
@@ -13,17 +15,34 @@ export async function POST() {
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.redirect(`${siteUrl}/auth/login?redirect=/pricing`);
+
+  if (!user) {
+    return NextResponse.redirect(`${siteUrl}/auth/login?redirect=/pricing`);
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('stripe_customer_id')
+    .eq('id', user.id)
+    .single();
 
   const stripe = new Stripe(stripeSecretKey);
+
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
-    customer_email: user.email ?? undefined,
+    customer: profile?.stripe_customer_id || undefined,
+    customer_email: profile?.stripe_customer_id ? undefined : user.email ?? undefined,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${siteUrl}/dashboard?upgraded=true`,
-    cancel_url: `${siteUrl}/pricing?canceled=true`,
+    allow_promotion_codes: true,
+    success_url: `${siteUrl}/dashboard?billing=success`,
+    cancel_url: `${siteUrl}/pricing?billing=cancelled`,
     metadata: { user_id: user.id },
+    subscription_data: { metadata: { user_id: user.id } },
   });
 
-  return NextResponse.redirect(session.url ?? `${siteUrl}/pricing`);
+  if (!session.url) {
+    return NextResponse.json({ error: 'Unable to create checkout session.' }, { status: 500 });
+  }
+
+  return NextResponse.redirect(session.url);
 }
