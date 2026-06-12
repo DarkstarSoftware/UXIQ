@@ -12,6 +12,7 @@ export function BillingCard({
   periodEnd?: string | null;
 }) {
   const isPro = plan === 'pro';
+  const isLifetime = status === 'lifetime';
 
   return (
     <div className="card p-6">
@@ -21,24 +22,28 @@ export function BillingCard({
         <p className="text-sm text-ui-muted">Current Plan</p>
         <p className="mt-2 text-4xl font-semibold text-white">{getPlanLabel(plan)}</p>
         <p className="mt-2 text-sm text-ui-muted">
-          Status: {getBillingStatusLabel(status)}
+          Status: {isLifetime ? 'Lifetime access' : getBillingStatusLabel(status)}
         </p>
 
-        {periodEnd ? (
+        {periodEnd && !isLifetime ? (
           <p className="mt-1 text-sm text-ui-muted">
             Renews/ends: {new Date(periodEnd).toLocaleDateString()}
           </p>
         ) : null}
       </div>
 
-      {isPro ? (
+      {isLifetime ? (
+        <p className="mt-5 rounded-xl border border-brand-500/30 bg-brand-500/10 px-4 py-3 text-sm text-brand-200">
+          Lifetime Pro access is active for this account.
+        </p>
+      ) : isPro ? (
         <form action="/api/stripe/portal" method="POST">
           <Button className="mt-5 w-full">Manage Billing</Button>
         </form>
       ) : (
-       <div className="mt-5">
-  <UpgradeButton />
-</div>
+        <div className="mt-5">
+          <UpgradeButton />
+        </div>
       )}
     </div>
   );

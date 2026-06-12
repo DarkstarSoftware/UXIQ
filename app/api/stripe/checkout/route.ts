@@ -21,20 +21,30 @@ export async function POST() {
 
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (userError || !user) {
     return NextResponse.json(
-      { url: `${siteUrl}/auth/login?redirect=/pricing` },
-      { status: 200 },
+      {
+        error: 'You must be signed in before upgrading.',
+        url: `${siteUrl}/auth/login?redirect=/pricing`,
+      },
+      { status: 401 },
     );
   }
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('stripe_customer_id, plan')
+    .select('stripe_customer_id, plan, subscription_status')
     .eq('id', user.id)
     .single();
+
+  if (profile?.plan === 'pro') {
+    return NextResponse.json({
+      url: `${siteUrl}/settings`,
+    });
+  }
 
   const stripe = new Stripe(stripeSecretKey);
 
