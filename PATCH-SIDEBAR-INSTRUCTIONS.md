@@ -1,19 +1,17 @@
-# Add Clients to Sidebar
+# Add Roadmaps to Sidebar
 
 Open:
 
 components/layout/sidebar.tsx
 
-Add this import:
+Add icon import:
 
 ```tsx
-import { Users } from 'lucide-react';
+import { Map } from 'lucide-react';
 ```
 
-Then add this nav item:
+Add nav item:
 
 ```tsx
-{ href: '/clients', label: 'Clients', icon: Users },
+{ href: '/roadmaps', label: 'Roadmaps', icon: Map },
 ```
-
-If your sidebar already imports icons in one line, add `Users` to that import.
