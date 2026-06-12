@@ -2,6 +2,10 @@ export function getPlanLabel(plan: string | null | undefined) {
   return plan === 'pro' ? 'Pro' : 'Free';
 }
 
+export function isProPlan(plan: string | null | undefined) {
+  return plan === 'pro';
+}
+
 export function getBillingStatusLabel(status: string | null | undefined) {
   if (!status || status === 'inactive') return 'Inactive';
   if (status === 'active') return 'Active';

@@ -10,8 +10,7 @@ export function BillingCard({
   status?: string | null;
   periodEnd?: string | null;
 }) {
-  const planLabel = getPlanLabel(plan);
-  const statusLabel = getBillingStatusLabel(status);
+  const isPro = plan === 'pro';
 
   return (
     <div className="card p-6">
@@ -19,17 +18,19 @@ export function BillingCard({
 
       <div className="mt-5 rounded-xl border border-ui-border bg-ui-surface/60 p-5">
         <p className="text-sm text-ui-muted">Current Plan</p>
-        <p className="mt-2 text-4xl font-semibold text-white">{planLabel}</p>
-        <p className="mt-2 text-sm text-ui-muted">Status: {statusLabel}</p>
+        <p className="mt-2 text-4xl font-semibold text-white">{getPlanLabel(plan)}</p>
+        <p className="mt-2 text-sm text-ui-muted">
+          Status: {getBillingStatusLabel(status)}
+        </p>
 
         {periodEnd ? (
           <p className="mt-1 text-sm text-ui-muted">
-            Current period ends: {new Date(periodEnd).toLocaleDateString()}
+            Renews/ends: {new Date(periodEnd).toLocaleDateString()}
           </p>
         ) : null}
       </div>
 
-      {plan === 'pro' ? (
+      {isPro ? (
         <form action="/api/stripe/portal" method="POST">
           <Button className="mt-5 w-full">Manage Billing</Button>
         </form>

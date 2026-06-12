@@ -15,8 +15,10 @@ const tiers = [
       'Basic Nielsen Norman references',
       'Basic WCAG-aware observations',
       'Top findings',
-      'Limited recommendations',
+      'Limited reports',
     ],
+    cta: 'Get Started Free',
+    href: '/auth/signup',
     featured: false,
   },
   {
@@ -26,24 +28,16 @@ const tiers = [
     features: [
       'Full AI audit',
       'WCAG 2.2 AA-oriented analysis',
-      'Conversion friction recommendations',
+      'Conversion recommendations',
       'Impact and effort ratings',
       'Saved audit history',
       'Competitor insights',
+      'PDF-ready exports',
+      'Roadmap generator',
     ],
+    cta: 'Start Pro',
+    href: '/api/stripe/checkout',
     featured: true,
-  },
-  {
-    name: 'Expert',
-    price: '$199+',
-    description: 'Manual expert UX review by Darkstar Software.',
-    features: [
-      'Human UX review',
-      'Executive-level findings',
-      'Prioritized fix roadmap',
-      'Optional redesign guidance',
-    ],
-    featured: false,
   },
 ];
 
@@ -59,18 +53,19 @@ export default function PricingPage() {
         </header>
 
         <section className="py-16 text-center">
-          <p className="text-sm uppercase tracking-[0.22em] text-brand-500">Pricing</p>
+          <p className="text-sm uppercase tracking-[0.22em] text-brand-500">
+            Pricing
+          </p>
 
           <h1 className="mt-4 text-5xl font-semibold tracking-tight">
             Start free. Upgrade when you need full AI intelligence.
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-lg text-ui-muted">
-            Free users receive basic Nielsen Norman + WCAG-aware findings.
-            Pro users unlock the complete Darkstar Audit AI engine.
+            Free users get basic UX and WCAG-aware findings. Pro users unlock the full Darkstar Audit AI engine.
           </p>
 
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
+          <div className="mx-auto mt-12 grid max-w-5xl gap-6 lg:grid-cols-2">
             {tiers.map((tier) => (
               <div
                 key={tier.name}
@@ -91,14 +86,17 @@ export default function PricingPage() {
                   ))}
                 </div>
 
-                <Link href={tier.featured ? '/auth/signup?plan=pro' : '/auth/signup'}>
-                  <Button
-                    className="mt-8 w-full"
-                    variant={tier.featured ? 'primary' : 'secondary'}
-                  >
-                    {tier.featured ? 'Start Pro' : 'Get Started'}
-                  </Button>
-                </Link>
+                {tier.featured ? (
+                  <form action="/api/stripe/checkout" method="POST">
+                    <Button className="mt-8 w-full">{tier.cta}</Button>
+                  </form>
+                ) : (
+                  <Link href={tier.href}>
+                    <Button variant="secondary" className="mt-8 w-full">
+                      {tier.cta}
+                    </Button>
+                  </Link>
+                )}
               </div>
             ))}
           </div>

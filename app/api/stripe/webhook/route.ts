@@ -1,27 +1,39 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 
+function getCustomerId(value: unknown) {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && 'id' in value && typeof value.id === 'string') {
+    return value.id;
+  }
+  return null;
+}
+
 function getPeriodEnd(subscription: Stripe.Subscription) {
-  const value = subscription.items.data[0]?.current_period_end;
-  return value ? new Date(value * 1000).toISOString() : null;
+  const items = subscription.items?.data ?? [];
+  const firstItem = items[0] as any;
+  const periodEnd = firstItem?.current_period_end;
+
+  if (!periodEnd) return null;
+
+  return new Date(periodEnd * 1000).toISOString();
 }
 
 async function updateProfileFromSubscription(subscription: Stripe.Subscription) {
   const supabase = createAdminClient();
-  const userId = subscription.metadata?.user_id;
-  const customerId =
-    typeof subscription.customer === 'string'
-      ? subscription.customer
-      : subscription.customer.id;
 
-  const plan = subscription.status === 'active' || subscription.status === 'trialing' ? 'pro' : 'free';
+  const customerId = getCustomerId(subscription.customer);
+  const userId = subscription.metadata?.user_id;
+  const isPaid = subscription.status === 'active' || subscription.status === 'trialing';
 
   const payload = {
-    plan,
+    plan: isPaid ? 'pro' : 'free',
     stripe_customer_id: customerId,
     stripe_subscription_id: subscription.id,
     subscription_status: subscription.status,
@@ -30,7 +42,10 @@ async function updateProfileFromSubscription(subscription: Stripe.Subscription) 
 
   if (userId) {
     await supabase.from('profiles').update(payload).eq('id', userId);
-  } else {
+    return;
+  }
+
+  if (customerId) {
     await supabase.from('profiles').update(payload).eq('stripe_customer_id', customerId);
   }
 }
@@ -40,7 +55,10 @@ export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!stripeSecretKey || !webhookSecret) {
-    return NextResponse.json({ error: 'Stripe webhook is not configured.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Stripe webhook is not configured.' },
+      { status: 500 },
+    );
   }
 
   const stripe = new Stripe(stripeSecretKey);
@@ -70,8 +88,9 @@ export async function POST(request: Request) {
         .from('profiles')
         .update({
           plan: 'pro',
-          stripe_customer_id: typeof session.customer === 'string' ? session.customer : null,
-          stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
+          stripe_customer_id: getCustomerId(session.customer),
+          stripe_subscription_id:
+            typeof session.subscription === 'string' ? session.subscription : null,
           subscription_status: 'active',
           billing_email: session.customer_details?.email ?? session.customer_email ?? null,
         })
@@ -79,12 +98,16 @@ export async function POST(request: Request) {
     }
   }
 
-  if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated') {
+  if (
+    event.type === 'customer.subscription.created' ||
+    event.type === 'customer.subscription.updated'
+  ) {
     await updateProfileFromSubscription(event.data.object as Stripe.Subscription);
   }
 
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription;
+
     await supabase
       .from('profiles')
       .update({
@@ -97,7 +120,7 @@ export async function POST(request: Request) {
 
   if (event.type === 'invoice.payment_failed') {
     const invoice = event.data.object as Stripe.Invoice;
-    const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
+    const customerId = getCustomerId(invoice.customer);
 
     if (customerId) {
       await supabase

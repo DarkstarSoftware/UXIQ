@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+
 import { createClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
@@ -9,14 +10,20 @@ export async function POST() {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   if (!stripeSecretKey || !siteUrl) {
-    return NextResponse.json({ error: 'Stripe portal is not configured.' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Stripe portal is not configured.' },
+      { status: 500 },
+    );
   }
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(`${siteUrl}/auth/login?redirect=/settings`);
+    return NextResponse.redirect(`${siteUrl}/auth/login?redirect=/settings`, 303);
   }
 
   const { data: profile } = await supabase
@@ -26,7 +33,7 @@ export async function POST() {
     .single();
 
   if (!profile?.stripe_customer_id) {
-    return NextResponse.redirect(`${siteUrl}/pricing`);
+    return NextResponse.redirect(`${siteUrl}/pricing`, 303);
   }
 
   const stripe = new Stripe(stripeSecretKey);
@@ -36,5 +43,5 @@ export async function POST() {
     return_url: `${siteUrl}/settings`,
   });
 
-  return NextResponse.redirect(session.url);
+  return NextResponse.redirect(session.url, 303);
 }
