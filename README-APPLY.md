@@ -1,12 +1,19 @@
-# AI UX Insight — UI, Billing, Navigation & Accessibility Fix
+# AI UX Insight — Full Site UI Fix
 
-Fixes:
-- Stripe checkout flow
-- Pricing and billing CTAs
-- Logo click goes to `/dashboard`
-- WCAG-friendly colors/focus states
-- Stable UI CSS without fragile Tailwind `@apply`
-- Todd lifetime Pro SQL helper
+This package replaces the broken marketing/pricing UI and fixes billing flow basics.
+
+## Apply
+
+```bash
+cd ~/Desktop/uxiq-auth-clean
+unzip ~/Downloads/aiuxinsight-full-site-ui-fix.zip
+npm run build
+git add .
+git commit -m "Fix full site UI accessibility and billing"
+git push
+```
+
+Then redeploy Vercel with Clear Build Cache.
 
 ## Required Vercel env vars
 
@@ -25,21 +32,4 @@ Stripe webhook endpoint:
 
 ```text
 https://www.aiuxinsight.com/api/stripe/webhook
-```
-
-## Apply
-
-```bash
-cd ~/Desktop/uxiq-auth-clean
-unzip ~/Downloads/aiuxinsight-ui-billing-accessibility-fix.zip
-npm run build
-git add .
-git commit -m "Fix UI billing navigation and accessibility"
-git push
-```
-
-Run this in Supabase SQL Editor if Todd still shows Free:
-
-```text
-supabase/pro-lifetime-fix.sql
 ```
