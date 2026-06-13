@@ -12,9 +12,10 @@ export function UpgradeButton({ label = 'Upgrade to Pro' }: { label?: string }) 
     try {
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
+        credentials: 'include',
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => null);
 
       if (!response.ok) {
         alert(data?.error || 'Unable to open Stripe Checkout.');
@@ -22,15 +23,15 @@ export function UpgradeButton({ label = 'Upgrade to Pro' }: { label?: string }) 
         return;
       }
 
-      if (data?.url) {
-        window.location.href = data.url;
+      if (!data?.url) {
+        alert('Stripe Checkout URL was not returned.');
+        setLoading(false);
         return;
       }
 
-      alert('Stripe Checkout URL was not returned.');
-    } catch {
-      alert('Unable to open Stripe Checkout.');
-    } finally {
+      window.location.href = data.url;
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Unable to open Stripe Checkout.');
       setLoading(false);
     }
   }

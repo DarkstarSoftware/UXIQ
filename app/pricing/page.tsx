@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { Check } from 'lucide-react';
-import { UpgradeButton } from '@/components/billing/upgrade-button';
+
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
+import { UpgradeButton } from '@/components/billing/upgrade-button';
 
 const tiers = [
   {
@@ -17,8 +18,6 @@ const tiers = [
       'Top findings',
       'Limited reports',
     ],
-    cta: 'Get Started Free',
-    href: '/auth/signup',
     featured: false,
   },
   {
@@ -35,8 +34,6 @@ const tiers = [
       'PDF-ready exports',
       'Roadmap generator',
     ],
-    cta: 'Start Pro',
-    href: '/api/stripe/checkout',
     featured: true,
   },
 ];
@@ -47,31 +44,27 @@ export default function PricingPage() {
       <div className="container-shell py-8">
         <header className="flex items-center justify-between">
           <Logo />
-          <Link href="/">
-            <Button variant="secondary">Back to Home</Button>
+          <Link href="/dashboard">
+            <Button variant="secondary">Dashboard</Button>
           </Link>
         </header>
 
         <section className="py-16 text-center">
-          <p className="text-sm uppercase tracking-[0.22em] text-brand-500">
-            Pricing
-          </p>
+          <p className="text-sm uppercase tracking-[0.22em] text-brand-300">Pricing</p>
 
           <h1 className="mt-4 text-5xl font-semibold tracking-tight">
             Start free. Upgrade when you need full AI intelligence.
           </h1>
 
           <p className="mx-auto mt-5 max-w-2xl text-lg text-ui-muted">
-            Free users get basic UX and WCAG-aware findings. Pro users unlock the full Darkstar Audit AI engine.
+            Free users get basic UX and WCAG-aware findings. Pro users unlock the full AI UX Insight engine.
           </p>
 
           <div className="mx-auto mt-12 grid max-w-5xl gap-6 lg:grid-cols-2">
             {tiers.map((tier) => (
               <div
                 key={tier.name}
-                className={`card p-8 text-left ${
-                  tier.featured ? 'border-brand-500/50 ring-1 ring-brand-500/30' : ''
-                }`}
+                className={`card p-8 text-left ${tier.featured ? 'border-brand-500' : ''}`}
               >
                 <p className="text-xl font-semibold">{tier.name}</p>
                 <p className="mt-3 text-sm text-ui-muted">{tier.description}</p>
@@ -87,13 +80,13 @@ export default function PricingPage() {
                 </div>
 
                 {tier.featured ? (
-                 <div className="mt-8">
-  <UpgradeButton label="Start Pro" />
-</div>
+                  <div className="mt-8">
+                    <UpgradeButton label="Start Pro Checkout" />
+                  </div>
                 ) : (
-                  <Link href={tier.href}>
+                  <Link href="/auth/signup">
                     <Button variant="secondary" className="mt-8 w-full">
-                      {tier.cta}
+                      Get Started Free
                     </Button>
                   </Link>
                 )}

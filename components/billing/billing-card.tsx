@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
-import { getBillingStatusLabel, getPlanLabel } from '@/lib/billing';
 import { UpgradeButton } from '@/components/billing/upgrade-button';
+import { getBillingStatusLabel, getPlanLabel } from '@/lib/billing';
 
 export function BillingCard({
   plan,
@@ -33,7 +33,7 @@ export function BillingCard({
       </div>
 
       {isLifetime ? (
-        <p className="mt-5 rounded-xl border border-brand-500/30 bg-brand-500/10 px-4 py-3 text-sm text-brand-200">
+        <p className="mt-5 rounded-xl border border-brand-500 bg-brand-500/10 px-4 py-3 text-sm text-brand-200">
           Lifetime Pro access is active for this account.
         </p>
       ) : isPro ? (
@@ -42,7 +42,7 @@ export function BillingCard({
         </form>
       ) : (
         <div className="mt-5">
-          <UpgradeButton />
+          <UpgradeButton label="Start Pro Checkout" />
         </div>
       )}
     </div>
