@@ -1,54 +1,47 @@
-# UXIQ SaaS Starter
+# AIUX Insight Design System
 
-AI-powered UX audit platform with Supabase auth, protected dashboard, free/basic audits, and paid-plan AI audits.
+This package defines a stable, WCAG-aware visual system for AIUX Insight.
 
-## What changed
+It includes:
 
-- Landing page is now informative and does not allow anonymous audits.
-- Users must create an account or sign in before analyzing a site.
-- Supabase auth has been added.
-- `/dashboard`, `/reports`, `/competitors`, and `/settings` are protected.
-- Free users receive a basic Nielsen Norman-inspired and WCAG-aware audit.
-- Paid users (`pro` or `agency` in Supabase `profiles.plan`) receive full OpenAI-powered audit output.
+- Design tokens
+- Typography scale
+- Color palette
+- Buttons
+- Inputs
+- Cards
+- Badges
+- Score cards
+- App shell/sidebar
+- Accessibility rules
+- Global CSS implementation
 
-## Environment variables
+## Apply
 
-Create `.env.local` locally and add these values:
+Copy the files into the project:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-OPENAI_API_KEY=your_openai_api_key
-OPENAI_MODEL=gpt-4.1-mini
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+unzip ~/Downloads/aiuxinsight-design-system.zip
 ```
 
-Add the same variables in Vercel Project Settings → Environment Variables. For production, set `NEXT_PUBLIC_SITE_URL` to your Vercel URL or custom domain.
+Then replace your current `app/globals.css` with:
 
-## Supabase setup
-
-1. Create a Supabase project.
-2. Go to SQL Editor.
-3. Paste and run `supabase/schema.sql`.
-4. Go to Authentication → URL Configuration.
-5. Set Site URL to your local URL during development and your Vercel URL in production.
-6. Add redirect URLs:
-   - `http://localhost:3000/auth/callback`
-   - `https://YOUR-VERCEL-DOMAIN.vercel.app/auth/callback`
-
-## Run locally
-
-```bash
-npm install
-npm run dev
+```text
+app/globals.css
 ```
 
-## Deploy updates
+Optional supporting files:
+
+```text
+lib/design-tokens.ts
+docs/AIUX-DESIGN-SYSTEM.md
+```
+
+Then run:
 
 ```bash
+npm run build
 git add .
-git commit -m "Add Supabase auth and gated audit flow"
+git commit -m "Add AIUX Insight design system"
 git push
 ```
-
-Vercel will redeploy automatically.
