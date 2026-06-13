@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Eye, LockKeyhole, Mail } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -15,6 +16,7 @@ export default function LoginClient() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +26,10 @@ export default function LoginClient() {
     setError('');
 
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (signInError) {
       setError(signInError.message);
@@ -37,31 +42,88 @@ export default function LoginClient() {
   }
 
   return (
-    <main className="ai-auth-page">
-      <section className="card ai-auth-card" aria-labelledby="login-title">
-        <Logo />
-        <h1 id="login-title" className="mt-8 text-3xl font-bold text-white">Sign in</h1>
-        <p className="mt-2 text-sm text-ui-muted">Access your dashboard, reports, billing, and audits.</p>
+    <main className="premium-auth-page">
+      <section className="premium-auth-card" aria-labelledby="login-title">
+        <div className="auth-card-header">
+          <Logo href="/" />
+          <span className="status-pill">Secure login</span>
+        </div>
 
-        <form onSubmit={handleLogin} className="mt-6 space-y-4">
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-white">Email</span>
-            <input className="ai-input" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+        <div className="auth-copy">
+          <p className="premium-eyebrow">Welcome back</p>
+          <h1 id="login-title">Sign in to AIUX Insight</h1>
+          <p>
+            Access your audits, saved reports, billing, competitors, and prioritized UX recommendations.
+          </p>
+        </div>
+
+        <form onSubmit={handleLogin} className="premium-auth-form">
+          <label>
+            <span>Email</span>
+            <div className="auth-input-wrap">
+              <Mail className="auth-input-icon" aria-hidden="true" />
+              <input
+                className="premium-input with-icon"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </div>
           </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-white">Password</span>
-            <input className="ai-input" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+
+          <label>
+            <span>Password</span>
+            <div className="auth-input-wrap">
+              <LockKeyhole className="auth-input-icon" aria-hidden="true" />
+              <input
+                className="premium-input with-icon with-action"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword((value) => !value)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                <Eye className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </div>
           </label>
 
-          {error ? <p className="rounded-xl border border-red-300 bg-red-950/40 px-4 py-3 text-sm text-red-200">{error}</p> : null}
+          {error ? (
+            <p className="premium-error" role="alert">
+              {error}
+            </p>
+          ) : null}
 
-          <Button type="submit" disabled={loading} className="w-full">{loading ? 'Signing in...' : 'Sign In'}</Button>
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? 'Signing in...' : 'Sign In'}
+          </Button>
         </form>
 
-        <p className="mt-6 text-sm text-ui-muted">
-          Need an account? <Link className="font-semibold text-brand-300" href="/auth/signup">Create one</Link>
-        </p>
+        <div className="auth-footer-line">
+          <span>Need an account?</span>
+          <Link href="/auth/signup">Create one</Link>
+        </div>
       </section>
+
+      <aside className="auth-side-panel" aria-label="AIUX Insight product summary">
+        <div className="score-dial small">
+          <div className="score-dial-inner">72</div>
+        </div>
+        <h2>UX audits that turn issues into action.</h2>
+        <p>
+          Get AI-assisted UX, accessibility, and conversion insights with prioritized fixes your team can actually ship.
+        </p>
+      </aside>
     </main>
   );
 }

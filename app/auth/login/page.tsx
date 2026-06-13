@@ -3,7 +3,7 @@ import LoginClient from './login-client';
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main className="ai-auth-page"><div className="card ai-auth-card">Loading...</div></main>}>
+    <Suspense fallback={<main className="premium-auth-page"><div className="premium-auth-card">Loading...</div></main>}>
       <LoginClient />
     </Suspense>
   );

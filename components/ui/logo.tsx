@@ -1,12 +1,12 @@
 import Link from 'next/link';
 
-export function Logo() {
+export function Logo({ href = '/dashboard' }: { href?: string }) {
   return (
-    <Link href="/dashboard" aria-label="Go to AI UX Insight dashboard" className="ai-logo">
-      <span className="ai-logo-mark" aria-hidden="true">UX</span>
+    <Link href={href} aria-label="AIUX Insight" className="aiux-logo">
+      <span className="aiux-logo-mark" aria-hidden="true">UX</span>
       <span>
-        <span className="ai-logo-title">AI UX Insight</span>
-        <span className="ai-logo-subtitle">Audit AI</span>
+        <span className="aiux-logo-title">AIUX Insight</span>
+        <span className="aiux-logo-subtitle">Audit AI</span>
       </span>
     </Link>
   );

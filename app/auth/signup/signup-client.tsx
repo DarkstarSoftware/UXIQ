@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { LockKeyhole, Mail } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
@@ -46,32 +47,78 @@ export default function SignupClient() {
   }
 
   return (
-    <main className="ai-auth-page">
-      <section className="card ai-auth-card" aria-labelledby="signup-title">
-        <Logo />
-        <h1 id="signup-title" className="mt-8 text-3xl font-bold text-white">Create account</h1>
-        <p className="mt-2 text-sm text-ui-muted">Start with a free audit, then upgrade when you need full AI intelligence.</p>
+    <main className="premium-auth-page">
+      <section className="premium-auth-card" aria-labelledby="signup-title">
+        <div className="auth-card-header">
+          <Logo href="/" />
+          <span className="status-pill">Free audit</span>
+        </div>
 
-        <form onSubmit={handleSignup} className="mt-6 space-y-4">
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-white">Email</span>
-            <input className="ai-input" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+        <div className="auth-copy">
+          <p className="premium-eyebrow">Start analyzing</p>
+          <h1 id="signup-title">Create your AIUX account</h1>
+          <p>
+            Run your first UX audit and uncover accessibility, usability, and conversion opportunities.
+          </p>
+        </div>
+
+        <form onSubmit={handleSignup} className="premium-auth-form">
+          <label>
+            <span>Email</span>
+            <div className="auth-input-wrap">
+              <Mail className="auth-input-icon" aria-hidden="true" />
+              <input
+                className="premium-input with-icon"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                required
+              />
+            </div>
           </label>
-          <label className="block">
-            <span className="mb-2 block text-sm font-medium text-white">Password</span>
-            <input className="ai-input" type="password" autoComplete="new-password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required />
+
+          <label>
+            <span>Password</span>
+            <div className="auth-input-wrap">
+              <LockKeyhole className="auth-input-icon" aria-hidden="true" />
+              <input
+                className="premium-input with-icon"
+                type="password"
+                autoComplete="new-password"
+                placeholder="Minimum 8 characters"
+                minLength={8}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                required
+              />
+            </div>
           </label>
 
-          {error ? <p className="rounded-xl border border-red-300 bg-red-950/40 px-4 py-3 text-sm text-red-200">{error}</p> : null}
-          {message ? <p className="rounded-xl border border-brand-500 bg-brand-500/10 px-4 py-3 text-sm text-brand-200">{message}</p> : null}
+          {error ? <p className="premium-error" role="alert">{error}</p> : null}
+          {message ? <p className="premium-success" role="status">{message}</p> : null}
 
-          <Button type="submit" disabled={loading} className="w-full">{loading ? 'Creating...' : 'Create Account'}</Button>
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? 'Creating account...' : 'Create Account'}
+          </Button>
         </form>
 
-        <p className="mt-6 text-sm text-ui-muted">
-          Already have an account? <Link className="font-semibold text-brand-300" href="/auth/login">Sign in</Link>
-        </p>
+        <div className="auth-footer-line">
+          <span>Already have an account?</span>
+          <Link href="/auth/login">Sign in</Link>
+        </div>
       </section>
+
+      <aside className="auth-side-panel" aria-label="AIUX Insight product summary">
+        <div className="score-dial small">
+          <div className="score-dial-inner">AI</div>
+        </div>
+        <h2>Designed for founders, teams, and agencies.</h2>
+        <p>
+          Turn usability friction, WCAG gaps, and conversion blockers into a clear action plan.
+        </p>
+      </aside>
     </main>
   );
 }

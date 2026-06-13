@@ -1,133 +1,229 @@
 import Link from 'next/link';
-import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
+import {
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  Eye,
+  Lock,
+  ShieldCheck,
+  Sparkles,
+  TrendingUp,
+} from 'lucide-react';
 
 import { UpgradeButton } from '@/components/billing/upgrade-button';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 
-const features = [
-  { icon: CheckCircle2, title: 'Nielsen Norman usability review', body: 'Evaluate clarity, consistency, error prevention, feedback, and user control.' },
-  { icon: ShieldCheck, title: 'WCAG accessibility checks', body: 'Surface common barriers around contrast, headings, labels, alt text, focus states, and forms.' },
-  { icon: TrendingUp, title: 'Conversion friction analysis', body: 'Find weak CTAs, confusing hierarchy, form friction, trust gaps, and unclear next steps.' },
-  { icon: Sparkles, title: 'AI-powered Pro recommendations', body: 'Unlock deeper AI-generated findings, prioritized fixes, saved reports, and roadmaps.' },
+const reviewAreas = [
+  {
+    icon: Eye,
+    title: 'UX clarity review',
+    body: 'Find confusing hierarchy, weak information scent, missing affordances, and unclear user paths.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'WCAG-aware accessibility',
+    body: 'Review contrast, labels, headings, focus states, keyboard access, and form usability.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Conversion friction',
+    body: 'Identify the exact issues that reduce signups, demos, checkouts, and lead conversion.',
+  },
 ];
 
-const freeItems = ['Overall UX score', 'Basic heuristic references', 'Basic WCAG-aware observations', 'Top findings'];
-const proItems = ['Full AI-powered audit', 'WCAG 2.2 AA review', 'Conversion recommendations', 'Impact and effort ratings', 'Saved history', 'Competitor insights', 'AI roadmap generator'];
+const proItems = [
+  'Full AI-powered audit report',
+  'WCAG 2.2 AA-oriented review',
+  'Conversion optimization recommendations',
+  'Impact and effort prioritization',
+  'Saved report history',
+  'Competitor and roadmap workflows',
+];
 
 export default function HomePage() {
   return (
-    <main className="ai-page">
-      <header className="ai-header">
-        <div className="container-shell ai-header-inner">
-          <Logo />
-          <div className="ai-header-actions">
-            <Link href="/auth/login"><Button variant="secondary">Sign In</Button></Link>
-            <Link href="/auth/signup"><Button>Create Account</Button></Link>
-          </div>
+    <main className="premium-page">
+      <header className="premium-nav">
+        <div className="premium-shell premium-nav-inner">
+          <Logo href="/" />
+          <nav className="premium-nav-links" aria-label="Primary navigation">
+            <Link href="#how-it-works">How it works</Link>
+            <Link href="/pricing">Pricing</Link>
+            <Link href="/auth/login">
+              <Button variant="secondary">Sign In</Button>
+            </Link>
+            <Link href="/auth/signup">
+              <Button>Create Account</Button>
+            </Link>
+          </nav>
         </div>
       </header>
 
-      <section className="container-shell ai-hero">
-        <div>
-          <p className="ai-kicker">AI-Powered UX, Accessibility & Conversion Intelligence</p>
-          <h1 className="ai-title">See your website through the eyes of UX experts and AI.</h1>
-          <p className="ai-subtitle">
-            AI UX Insight helps teams uncover usability issues, WCAG compliance gaps, accessibility barriers,
-            and conversion friction before those problems cost customers.
+      <section className="premium-shell premium-hero">
+        <div className="premium-hero-copy">
+          <p className="premium-eyebrow">AI-powered UX, accessibility, and conversion intelligence</p>
+
+          <h1>
+            Find the UX issues costing your site conversions.
+          </h1>
+
+          <p className="premium-subtitle">
+            AIUX Insight reviews your website like a senior UX strategist, accessibility specialist,
+            and conversion analyst — then turns the findings into prioritized fixes.
           </p>
-          <div className="ai-action-row">
-            <Link href="/auth/signup"><Button>Start Free Audit <ArrowRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
-            <Link href="/pricing"><Button variant="secondary">Compare Plans</Button></Link>
+
+          <div className="premium-actions">
+            <Link href="/auth/signup">
+              <Button>
+                Start Free Audit <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button variant="secondary">View Pricing</Button>
+            </Link>
           </div>
-          <div className="ai-note"><Lock className="h-4 w-4 text-brand-300" aria-hidden="true" /> Sign in required before running an audit.</div>
+
+          <div className="premium-proof">
+            <span><CheckCircle2 aria-hidden="true" /> WCAG-aware checks</span>
+            <span><CheckCircle2 aria-hidden="true" /> Conversion recommendations</span>
+            <span><CheckCircle2 aria-hidden="true" /> Built for teams and agencies</span>
+          </div>
         </div>
 
-        <aside className="ai-preview" aria-label="Sample audit preview">
-          <div className="ai-preview-top">
-            <span>Sample audit preview</span>
-            <span className="ai-pill">Free Preview</span>
-          </div>
-          <div className="ai-score-row">
+        <aside className="audit-preview-card" aria-label="Sample AIUX Insight audit preview">
+          <div className="audit-preview-toolbar">
             <div>
-              <p className="ai-score">72</p>
-              <p className="ai-score-label">Good, but losing conversions</p>
+              <p className="mini-label">Live audit preview</p>
+              <strong>nikestore.com</strong>
             </div>
-            <span className="ai-pill">WCAG notes</span>
+            <span className="status-pill">AI Report</span>
           </div>
-          <div className="ai-preview-list">
-            {['CTA hierarchy needs improvement', 'Form labels require accessibility review', 'Hero section lacks one dominant next step'].map((item) => (
-              <div key={item} className="ai-preview-item">{item}</div>
+
+          <div className="audit-score-panel">
+            <div className="score-dial">
+              <div className="score-dial-inner">72</div>
+            </div>
+
+            <div>
+              <p className="score-title">UX Score</p>
+              <p className="score-summary">Good, but losing conversions.</p>
+              <p className="score-copy">
+                High-impact fixes found across CTA visibility, form accessibility, and page hierarchy.
+              </p>
+            </div>
+          </div>
+
+          <div className="metric-grid">
+            {[
+              ['Usability', '68'],
+              ['Accessibility', '54'],
+              ['Conversion', '61'],
+              ['Visual Design', '80'],
+            ].map(([label, score]) => (
+              <div key={label} className="metric-card">
+                <span>{label}</span>
+                <strong>{score}</strong>
+              </div>
             ))}
           </div>
-          <div className="ai-unlock">
-            <strong>Upgrade unlocks:</strong>
-            <span>Full AI recommendations, prioritized fixes, saved reports, competitor insights, and AI-generated roadmaps.</span>
+
+          <div className="issue-stack">
+            {[
+              ['HIGH', 'CTA button lacks contrast'],
+              ['HIGH', 'No clear call-to-action above the fold'],
+              ['MED', 'Form is too long'],
+            ].map(([severity, issue]) => (
+              <div key={issue} className="premium-issue-row">
+                <span className={severity === 'HIGH' ? 'severity high' : 'severity med'}>{severity}</span>
+                <span>{issue}</span>
+              </div>
+            ))}
           </div>
         </aside>
       </section>
 
-      <section className="container-shell ai-section">
-        <div className="ai-section-heading">
-          <p className="ai-kicker">What AI UX Insight Reviews</p>
-          <h2>Built around the issues that impact trust, accessibility, and conversion.</h2>
+      <section id="how-it-works" className="premium-shell premium-section">
+        <div className="premium-section-heading">
+          <p className="premium-eyebrow">What AIUX reviews</p>
+          <h2>Built around the issues that affect trust, usability, accessibility, and revenue.</h2>
         </div>
-        <div className="ai-feature-grid">
-          {features.map((feature) => {
-            const Icon = feature.icon;
+
+        <div className="premium-feature-grid">
+          {reviewAreas.map((item) => {
+            const Icon = item.icon;
             return (
-              <article key={feature.title} className="card ai-feature-card">
-                <Icon className="ai-feature-icon" aria-hidden="true" />
-                <h3>{feature.title}</h3>
-                <p>{feature.body}</p>
+              <article key={item.title} className="premium-feature-card">
+                <Icon className="feature-icon" aria-hidden="true" />
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
               </article>
             );
           })}
         </div>
       </section>
 
-      <section className="ai-plan-section">
-        <div className="container-shell">
-          <div className="ai-section-heading ai-center">
-            <p className="ai-kicker">Free vs Pro</p>
-            <h2>Start with basic guidance. Upgrade for full AI intelligence.</h2>
-            <p>Free users receive basic heuristic and WCAG-aware findings. Pro users receive full AI-powered analysis, saved history, exports, and roadmaps.</p>
+      <section className="premium-plan-band">
+        <div className="premium-shell">
+          <div className="premium-section-heading centered">
+            <p className="premium-eyebrow">Free vs Pro</p>
+            <h2>Start with a quick scan. Upgrade for full AI audit intelligence.</h2>
+            <p>
+              Free users receive basic UX and WCAG-aware findings. Pro users unlock complete reports,
+              exports, saved history, competitors, and roadmaps.
+            </p>
           </div>
-          <div className="ai-plan-grid">
-            <article className="card ai-plan-card">
-              <p className="ai-plan-label">Free</p>
+
+          <div className="premium-plan-grid">
+            <article className="premium-plan-card">
+              <p className="mini-label">Free</p>
               <h3>Basic audit summary</h3>
-              <p>Great for quick validation and understanding obvious UX or accessibility concerns.</p>
-              <div className="ai-check-list">
-                {freeItems.map((item) => <div key={item} className="ai-check-row"><CheckCircle2 className="ai-check-icon" aria-hidden="true" /><span>{item}</span></div>)}
-              </div>
-              <Link href="/auth/signup"><Button variant="secondary" className="w-full">Create Free Account</Button></Link>
+              <p>Great for fast validation and identifying obvious UX or accessibility concerns.</p>
+              <ul>
+                <li><CheckCircle2 aria-hidden="true" /> Overall UX score</li>
+                <li><CheckCircle2 aria-hidden="true" /> Basic heuristic references</li>
+                <li><CheckCircle2 aria-hidden="true" /> Top findings</li>
+              </ul>
+              <Link href="/auth/signup">
+                <Button variant="secondary" className="w-full">Create Free Account</Button>
+              </Link>
             </article>
-            <article className="card ai-plan-card ai-plan-pro">
-              <p className="ai-plan-label">Pro</p>
-              <h3>Full AI audit intelligence</h3>
-              <p>Best for founders, teams, marketers, and agencies that need deeper recommendations.</p>
-              <div className="ai-check-list">
-                {proItems.map((item) => <div key={item} className="ai-check-row"><CheckCircle2 className="ai-check-icon" aria-hidden="true" /><span>{item}</span></div>)}
+
+            <article className="premium-plan-card featured">
+              <div className="plan-card-topline">
+                <p className="mini-label">Pro</p>
+                <span className="status-pill">Best value</span>
               </div>
+              <h3>Full AI audit intelligence</h3>
+              <p>Best for founders, product teams, marketers, and agencies that need prioritized fixes.</p>
+              <ul>
+                {proItems.map((item) => (
+                  <li key={item}><CheckCircle2 aria-hidden="true" /> {item}</li>
+                ))}
+              </ul>
               <UpgradeButton label="Start Pro Checkout" />
             </article>
           </div>
         </div>
       </section>
 
-      <section className="container-shell ai-cta-section">
-        <div className="card ai-cta-card">
-          <p className="ai-kicker">Ready to find the friction?</p>
-          <h2>Create an account to run your first AI UX Insight report.</h2>
-          <p>Start free, then upgrade when you need the full AI-powered UX, WCAG, accessibility, and conversion report.</p>
-          <Link href="/auth/signup"><Button>Create Account</Button></Link>
+      <section className="premium-shell premium-cta-section">
+        <div className="premium-cta-card">
+          <BarChart3 className="cta-icon" aria-hidden="true" />
+          <p className="premium-eyebrow">Ready to find the friction?</p>
+          <h2>Run your first AIUX Insight audit today.</h2>
+          <p>
+            See where users struggle, where accessibility breaks down, and which fixes can improve conversion fastest.
+          </p>
+          <Link href="/auth/signup">
+            <Button>Create Account</Button>
+          </Link>
         </div>
       </section>
 
-      <footer className="ai-footer">
-        <div className="container-shell ai-footer-inner">
-          <p>© 2026 AI UX Insight.</p>
+      <footer className="premium-footer">
+        <div className="premium-shell premium-footer-inner">
+          <p>© 2026 AIUX Insight.</p>
           <div>
             <Link href="/pricing">Pricing</Link>
             <Link href="/auth/login">Sign In</Link>

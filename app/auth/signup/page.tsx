@@ -3,7 +3,7 @@ import SignupClient from './signup-client';
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<main className="ai-auth-page"><div className="card ai-auth-card">Loading...</div></main>}>
+    <Suspense fallback={<main className="premium-auth-page"><div className="premium-auth-card">Loading...</div></main>}>
       <SignupClient />
     </Suspense>
   );
