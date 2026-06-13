@@ -1,56 +1,29 @@
-# AI UX Insight — Full Core Repair
+# AI UX Insight — Premium UI Design Pass
 
-This is a stabilizing repair package for the whole app experience.
+This package keeps the repaired site structure but makes it look like the supplied UXIQ design library.
 
-It replaces:
-- Global CSS/design system
-- Button
-- Input
-- Logo
-- App shell
-- Sidebar
-- Landing page
-- Login page
-- Signup page
-- Auth callback
-- Dashboard
-- Pricing
-- Settings
-- Billing
-- Reports
-- Competitors
-- Roadmaps
-- Clients
-- Stripe checkout route
+## Updates
+
+- Premium dark glass design system
+- UXIQ-style sidebar and top navigation
+- Better dashboard layout
+- Polished audit cards and score cards
+- Improved reports, competitors, settings, billing, clients, and roadmap pages
+- Better landing page visual hierarchy
+- Improved form controls
+- Accessible focus states
+- Higher contrast text and borders
+- Cleaner spacing and typography
 
 ## Apply
 
 ```bash
 cd ~/Desktop/uxiq-auth-clean
-unzip ~/Downloads/aiuxinsight-full-core-repair.zip
+unzip ~/Downloads/aiuxinsight-premium-ui-design-pass.zip
 npm run build
 git add .
-git commit -m "Repair full AI UX Insight core app"
+git commit -m "Apply premium UXIQ visual design system"
 git push
 ```
 
 Then redeploy Vercel with Clear Build Cache.
-
-## Required env
-
-```env
-NEXT_PUBLIC_SITE_URL=https://www.aiuxinsight.com
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-STRIPE_SECRET_KEY=
-STRIPE_PRO_PRICE_ID=
-STRIPE_WEBHOOK_SECRET=
-OPENAI_API_KEY=
-```
-
-Stripe webhook:
-
-```text
-https://www.aiuxinsight.com/api/stripe/webhook
-```
