@@ -1,23 +1,18 @@
 import { redirect } from 'next/navigation';
-
 import { AppShell } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
-export default async function Page() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+const clients = [['Northstar Retail','3 active reports','NR'],['Summit SaaS','2 active reports','SS'],['BluePeak Studio','5 active reports','BP']];
 
+export default async function ClientsPage() {
+  const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login?redirect=/clients');
-
   return (
-    <AppShell title="Clients" subtitle="Manage agency client profiles">
+    <AppShell title="Clients" subtitle="Manage agency client profiles and client-ready audit reports" actions={<Button>Add Client</Button>}>
       <section className="card app-section">
-        <h2 className="section-title">Clients</h2>
-        <p className="mt-3 text-ui-muted">Client records will appear here for agency and white-label workflows.</p>
-        <div className="mt-6">
-          <Button variant="secondary">Coming Soon</Button>
-        </div>
+        <div className="app-toolbar"><div><p className="app-kicker">Client Workspace</p><h2 className="section-title">Active Clients</h2></div><Button variant="secondary">Invite Team</Button></div>
+        <div className="client-grid">{clients.map(([name, reports, initials])=><article key={name} className="client-card"><div className="client-avatar">{initials}</div><h3 className="mt-5 text-xl font-semibold text-white">{name}</h3><p className="app-muted">{reports}</p><div className="mt-5"><Button variant="secondary" className="w-full">View Client</Button></div></article>)}</div>
       </section>
     </AppShell>
   );
