@@ -1,28 +1,32 @@
-# AI UX Insight — Premium UI Design Pass
+# AI UX Insight — UXIQ Design System Application
 
-This package keeps the repaired site structure but makes it look like the supplied UXIQ design library.
+This package applies the uploaded UXIQ-style design system across the site.
 
-## Updates
-
-- Premium dark glass design system
-- UXIQ-style sidebar and top navigation
-- Better dashboard layout
-- Polished audit cards and score cards
-- Improved reports, competitors, settings, billing, clients, and roadmap pages
-- Better landing page visual hierarchy
-- Improved form controls
-- Accessible focus states
-- Higher contrast text and borders
-- Cleaner spacing and typography
+It updates:
+- Global typography
+- Heading scale
+- Text color hierarchy
+- Indigo primary palette
+- Semantic colors
+- Background/card/border colors
+- Buttons
+- Inputs
+- Cards
+- Score cards
+- Issue rows
+- Sidebar
+- Dashboard
+- Reports
+- Settings
 
 ## Apply
 
 ```bash
 cd ~/Desktop/uxiq-auth-clean
-unzip ~/Downloads/aiuxinsight-premium-ui-design-pass.zip
+unzip ~/Downloads/aiuxinsight-uxiq-design-system-application.zip
 npm run build
 git add .
-git commit -m "Apply premium UXIQ visual design system"
+git commit -m "Apply UXIQ design system globally"
 git push
 ```
 
