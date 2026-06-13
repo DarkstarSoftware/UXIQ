@@ -6,47 +6,37 @@ import { createAdminClient } from '@/lib/supabase/admin';
 
 export const runtime = 'nodejs';
 
-function getCustomerId(value: unknown) {
+function customerId(value: unknown) {
   if (!value) return null;
   if (typeof value === 'string') return value;
-  if (typeof value === 'object' && 'id' in value && typeof value.id === 'string') {
-    return value.id;
-  }
+  if (typeof value === 'object' && 'id' in value && typeof value.id === 'string') return value.id;
   return null;
 }
 
-function getPeriodEnd(subscription: Stripe.Subscription) {
-  const items = subscription.items?.data ?? [];
-  const firstItem = items[0] as any;
-  const periodEnd = firstItem?.current_period_end;
-
-  if (!periodEnd) return null;
-
-  return new Date(periodEnd * 1000).toISOString();
+function periodEnd(subscription: Stripe.Subscription) {
+  const firstItem = subscription.items?.data?.[0] as any;
+  const value = firstItem?.current_period_end;
+  return value ? new Date(value * 1000).toISOString() : null;
 }
 
-async function updateProfileFromSubscription(subscription: Stripe.Subscription) {
+async function updateFromSubscription(subscription: Stripe.Subscription) {
   const supabase = createAdminClient();
-
-  const customerId = getCustomerId(subscription.customer);
   const userId = subscription.metadata?.user_id;
+  const cid = customerId(subscription.customer);
   const isPaid = subscription.status === 'active' || subscription.status === 'trialing';
 
   const payload = {
     plan: isPaid ? 'pro' : 'free',
-    stripe_customer_id: customerId,
+    stripe_customer_id: cid,
     stripe_subscription_id: subscription.id,
     subscription_status: subscription.status,
-    subscription_current_period_end: getPeriodEnd(subscription),
+    subscription_current_period_end: periodEnd(subscription),
   };
 
   if (userId) {
     await supabase.from('profiles').update(payload).eq('id', userId);
-    return;
-  }
-
-  if (customerId) {
-    await supabase.from('profiles').update(payload).eq('stripe_customer_id', customerId);
+  } else if (cid) {
+    await supabase.from('profiles').update(payload).eq('stripe_customer_id', cid);
   }
 }
 
@@ -55,19 +45,14 @@ export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!stripeSecretKey || !webhookSecret) {
-    return NextResponse.json(
-      { error: 'Stripe webhook is not configured.' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Stripe webhook is not configured.' }, { status: 500 });
   }
 
   const stripe = new Stripe(stripeSecretKey);
   const signature = (await headers()).get('stripe-signature');
   const body = await request.text();
 
-  if (!signature) {
-    return NextResponse.json({ error: 'Missing Stripe signature.' }, { status: 400 });
-  }
+  if (!signature) return NextResponse.json({ error: 'Missing Stripe signature.' }, { status: 400 });
 
   let event: Stripe.Event;
 
@@ -84,52 +69,38 @@ export async function POST(request: Request) {
     const userId = session.metadata?.user_id;
 
     if (userId) {
-      await supabase
-        .from('profiles')
-        .update({
-          plan: 'pro',
-          stripe_customer_id: getCustomerId(session.customer),
-          stripe_subscription_id:
-            typeof session.subscription === 'string' ? session.subscription : null,
-          subscription_status: 'active',
-          billing_email: session.customer_details?.email ?? session.customer_email ?? null,
-        })
-        .eq('id', userId);
+      await supabase.from('profiles').update({
+        plan: 'pro',
+        stripe_customer_id: customerId(session.customer),
+        stripe_subscription_id: typeof session.subscription === 'string' ? session.subscription : null,
+        subscription_status: 'active',
+        billing_email: session.customer_details?.email ?? session.customer_email ?? null,
+      }).eq('id', userId);
     }
   }
 
-  if (
-    event.type === 'customer.subscription.created' ||
-    event.type === 'customer.subscription.updated'
-  ) {
-    await updateProfileFromSubscription(event.data.object as Stripe.Subscription);
+  if (event.type === 'customer.subscription.created' || event.type === 'customer.subscription.updated') {
+    await updateFromSubscription(event.data.object as Stripe.Subscription);
   }
 
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription;
-
-    await supabase
-      .from('profiles')
-      .update({
-        plan: 'free',
-        subscription_status: 'canceled',
-        subscription_current_period_end: null,
-      })
-      .eq('stripe_subscription_id', subscription.id);
+    await supabase.from('profiles').update({
+      plan: 'free',
+      subscription_status: 'canceled',
+      subscription_current_period_end: null,
+    }).eq('stripe_subscription_id', subscription.id);
   }
 
   if (event.type === 'invoice.payment_failed') {
     const invoice = event.data.object as Stripe.Invoice;
-    const customerId = getCustomerId(invoice.customer);
+    const cid = customerId(invoice.customer);
 
-    if (customerId) {
-      await supabase
-        .from('profiles')
-        .update({
-          plan: 'free',
-          subscription_status: 'past_due',
-        })
-        .eq('stripe_customer_id', customerId);
+    if (cid) {
+      await supabase.from('profiles').update({
+        plan: 'free',
+        subscription_status: 'past_due',
+      }).eq('stripe_customer_id', cid);
     }
   }
 
