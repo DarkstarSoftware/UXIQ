@@ -1,19 +1,7 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
-
-const clients = [['Northstar Retail','3 active reports','NR'],['Summit SaaS','2 active reports','SS'],['BluePeak Studio','5 active reports','BP']];
-
-export default async function ClientsPage() {
-  const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/auth/login?redirect=/clients');
-  return (
-    <AppShell title="Clients" subtitle="Manage agency client profiles and client-ready audit reports" actions={<Button>Add Client</Button>}>
-      <section className="card app-section">
-        <div className="app-toolbar"><div><p className="app-kicker">Client Workspace</p><h2 className="section-title">Active Clients</h2></div><Button variant="secondary">Invite Team</Button></div>
-        <div className="client-grid">{clients.map(([name, reports, initials])=><article key={name} className="client-card"><div className="client-avatar">{initials}</div><h3 className="mt-5 text-xl font-semibold text-white">{name}</h3><p className="app-muted">{reports}</p><div className="mt-5"><Button variant="secondary" className="w-full">View Client</Button></div></article>)}</div>
-      </section>
-    </AppShell>
-  );
-}
+const clients=[['Northstar Retail','3 active reports','NR'],['Summit SaaS','2 active reports','SS'],['BluePeak Studio','5 active reports','BP']];
+export default async function ClientsPage(){ const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser(); if(!user) redirect('/auth/login?redirect=/clients'); return <AppShell title="Clients" subtitle="Manage agency client profiles and client-ready audit reports" actions={<Link href="/clients/new"><Button>Add Client</Button></Link>}><section className="card app-section"><div className="app-toolbar"><div><p className="app-kicker">Client Workspace</p><h2 className="section-title">Active Clients</h2></div><Button variant="secondary">Invite Team</Button></div><div className="client-grid">{clients.map(([name,reports,initials])=><article key={name} className="client-card"><div className="client-avatar">{initials}</div><h3 className="mt-5 text-xl font-semibold text-white">{name}</h3><p className="app-muted">{reports}</p><div className="mt-5"><Link href={`/clients/${initials.toLowerCase()}`}><Button variant="secondary" className="w-full">View Client</Button></Link></div></article>)}</div></section></AppShell>; }

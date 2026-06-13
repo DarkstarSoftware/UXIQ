@@ -1,0 +1,5 @@
+import { redirect } from 'next/navigation';
+import { AppShell } from '@/components/layout/app-shell';
+import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/server';
+export default async function NewComparisonPage(){ const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser(); if(!user) redirect('/auth/login?redirect=/competitors/new'); return <AppShell title="Add Comparison" subtitle="Compare your site against competitor experiences"><section className="card app-section"><form action="/competitors" className="form-grid"><label><span className="form-label">Your website</span><input className="ai-input" name="site" placeholder="https://yoursite.com" required /></label><label><span className="form-label">Competitor 1</span><input className="ai-input" name="competitor1" placeholder="https://competitor.com" required /></label><label><span className="form-label">Competitor 2</span><input className="ai-input" name="competitor2" placeholder="https://anothercompetitor.com" /></label><Button type="submit">Compare Sites</Button></form></section></AppShell>; }

@@ -1,0 +1,6 @@
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+export function AnalyzeForm(){ const router=useRouter(); const [url,setUrl]=useState(''); const [error,setError]=useState(''); const [loading,setLoading]=useState(false); async function handleSubmit(e:React.FormEvent<HTMLFormElement>){ e.preventDefault(); setError(''); setLoading(true); try{ const response=await fetch('/api/audit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})}); const data=await response.json().catch(()=>null); if(!response.ok){ setError(data?.error||'Unable to analyze this website.'); setLoading(false); return;} router.push(data.redirectTo||'/reports'); router.refresh(); }catch{ setError('Unable to analyze this website.'); setLoading(false);} } return <form onSubmit={handleSubmit} className="form-grid"><label><span className="form-label">Website URL</span><input className="ai-input" name="url" placeholder="https://example.com" value={url} onChange={(e)=>setUrl(e.target.value)} required /></label>{error?<p className="premium-error" role="alert">{error}</p>:null}<Button type="submit" disabled={loading}>{loading?'Analyzing...':'Analyze Site'} <Sparkles className="h-4 w-4" aria-hidden="true" /></Button></form>; }

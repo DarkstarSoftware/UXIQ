@@ -1,0 +1,5 @@
+import { redirect } from 'next/navigation';
+import { AppShell } from '@/components/layout/app-shell';
+import { Button } from '@/components/ui/button';
+import { createClient } from '@/lib/supabase/server';
+export default async function NewClientPage(){ const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser(); if(!user) redirect('/auth/login?redirect=/clients/new'); return <AppShell title="Add Client" subtitle="Create a new client workspace"><section className="card app-section"><form action="/clients" className="form-grid"><label><span className="form-label">Client name</span><input className="ai-input" name="name" placeholder="Northstar Retail" required /></label><label><span className="form-label">Website</span><input className="ai-input" name="website" placeholder="https://client.com" required /></label><label><span className="form-label">Primary contact</span><input className="ai-input" name="contact" placeholder="client@example.com" /></label><Button type="submit">Create Client</Button></form></section></AppShell>; }
