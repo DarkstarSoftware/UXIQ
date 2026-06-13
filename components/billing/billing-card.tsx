@@ -15,7 +15,7 @@ export function BillingCard({
   const isLifetime = status === 'lifetime';
 
   return (
-    <div className="card p-6">
+    <div className="card app-section">
       <h2 className="section-title">Billing</h2>
 
       <div className="mt-5 rounded-xl border border-ui-border bg-ui-surface/60 p-5">

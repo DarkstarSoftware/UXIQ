@@ -6,26 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 
 const features = [
-  {
-    icon: CheckCircle2,
-    title: 'Nielsen Norman usability review',
-    body: 'Evaluate clarity, consistency, error prevention, feedback, and user control.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'WCAG accessibility checks',
-    body: 'Surface common barriers around contrast, headings, labels, alt text, focus states, and forms.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Conversion friction analysis',
-    body: 'Find weak CTAs, confusing hierarchy, form friction, trust gaps, and unclear next steps.',
-  },
-  {
-    icon: Sparkles,
-    title: 'AI-powered Pro recommendations',
-    body: 'Unlock deeper AI-generated findings, prioritized fixes, saved reports, and roadmaps.',
-  },
+  { icon: CheckCircle2, title: 'Nielsen Norman usability review', body: 'Evaluate clarity, consistency, error prevention, feedback, and user control.' },
+  { icon: ShieldCheck, title: 'WCAG accessibility checks', body: 'Surface common barriers around contrast, headings, labels, alt text, focus states, and forms.' },
+  { icon: TrendingUp, title: 'Conversion friction analysis', body: 'Find weak CTAs, confusing hierarchy, form friction, trust gaps, and unclear next steps.' },
+  { icon: Sparkles, title: 'AI-powered Pro recommendations', body: 'Unlock deeper AI-generated findings, prioritized fixes, saved reports, and roadmaps.' },
 ];
 
 const freeItems = ['Overall UX score', 'Basic heuristic references', 'Basic WCAG-aware observations', 'Top findings'];
@@ -52,12 +36,10 @@ export default function HomePage() {
             AI UX Insight helps teams uncover usability issues, WCAG compliance gaps, accessibility barriers,
             and conversion friction before those problems cost customers.
           </p>
-
           <div className="ai-action-row">
             <Link href="/auth/signup"><Button>Start Free Audit <ArrowRight className="h-4 w-4" aria-hidden="true" /></Button></Link>
             <Link href="/pricing"><Button variant="secondary">Compare Plans</Button></Link>
           </div>
-
           <div className="ai-note"><Lock className="h-4 w-4 text-brand-300" aria-hidden="true" /> Sign in required before running an audit.</div>
         </div>
 
