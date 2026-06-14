@@ -1,63 +1,51 @@
-'use client';
+<div className="sidebar">
+  <div className="sidebar-top">
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import {
-  CreditCard,
-  FileText,
-  Gauge,
-  GitCompare,
-  LogOut,
-  Map,
-  Settings,
-  Users,
-} from 'lucide-react';
+    {/* Logo */}
 
-import { Logo } from '@/components/ui/logo';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+    {/* Navigation */}
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: Gauge },
-  { href: '/reports', label: 'Reports', icon: FileText },
-  { href: '/competitors', label: 'Competitors', icon: GitCompare },
-  { href: '/roadmaps', label: 'Roadmaps', icon: Map },
-  { href: '/clients', label: 'Clients', icon: Users },
-  { href: '/billing', label: 'Billing', icon: CreditCard },
-  { href: '/settings', label: 'Settings', icon: Settings },
-];
+    <nav className="sidebar-nav">
+      {/* Dashboard */}
+      {/* Reports */}
+      {/* Roadmaps */}
+      {/* Competitors */}
+      {/* Settings */}
+    </nav>
 
-export function Sidebar() {
-  const pathname = usePathname();
+  </div>
 
-  return (
-    <aside className="app-sidebar">
-      <Logo href="/dashboard" />
+  <div className="sidebar-bottom">
 
-      <nav className="app-nav" aria-label="Application navigation">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    <div className="sidebar-user">
+      <div className="profile-avatar">
+        {user?.email?.charAt(0).toUpperCase()}
+      </div>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn('app-nav-link', active && 'app-nav-link-active')}
-            >
-              <Icon className="h-5 w-5" aria-hidden="true" />
-              <span>{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      <div>
+        <p className="sidebar-user-name">
+          {profile?.full_name || 'Account'}
+        </p>
 
-      <form action="/auth/signout" method="POST" className="mt-8">
-        <Button type="submit" variant="secondary" className="w-full">
-          <LogOut className="h-4 w-4" aria-hidden="true" />
-          Sign Out
-        </Button>
-      </form>
-    </aside>
-  );
-}
+        <span className="badge badge-pro">
+          {profile?.plan === 'pro_lifetime'
+            ? 'Pro Lifetime'
+            : profile?.plan === 'pro'
+            ? 'Pro'
+            : 'Free'}
+        </span>
+      </div>
+    </div>
+
+    <form action="/auth/signout" method="POST">
+      <Button
+        type="submit"
+        variant="ghost"
+        className="w-full justify-start"
+      >
+        Log Out
+      </Button>
+    </form>
+
+  </div>
+</div>

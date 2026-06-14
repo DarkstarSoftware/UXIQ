@@ -48,6 +48,61 @@ h1,h2,h3,h4,h5,h6{color:var(--aiux-text);letter-spacing:-.035em} p{margin-top:0}
 .comparison-grid,.client-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.comparison-card,.client-card{padding:20px;border:1px solid var(--aiux-border);border-radius:14px;background:rgba(31,41,55,.72)}.comparison-rank,.roadmap-index{display:inline-flex;width:28px;height:28px;align-items:center;justify-content:center;border-radius:999px;background:var(--aiux-indigo-500);font-size:13px;font-weight:750}.comparison-score{margin:18px 0 0;color:#fff;font-size:42px;font-weight:750;line-height:1}
 .roadmap-list{display:grid;gap:14px}.roadmap-item{display:grid;grid-template-columns:48px minmax(0,1fr) 130px;gap:16px;align-items:start;padding:18px;border:1px solid var(--aiux-border);border-radius:14px;background:rgba(31,41,55,.72)}.roadmap-index{width:36px;height:36px;background:rgba(99,102,241,.24);color:#c7d2fe}.client-avatar{display:grid;width:42px;height:42px;place-items:center;border-radius:12px;background:linear-gradient(135deg,#7c83ff,#3b82f6);color:#fff;font-weight:750}
 .settings-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.9fr);gap:18px}.settings-stack,.form-grid{display:grid;gap:18px}.form-label{display:block;margin-bottom:8px;color:var(--aiux-text-soft);font-size:14px;font-weight:650}.setting-row{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 0;border-top:1px solid var(--aiux-border)}.setting-row:first-child{border-top:0}.toggle-pill{width:46px;height:26px;border-radius:999px;border:1px solid rgba(34,198,94,.45);background:rgba(34,198,94,.24);position:relative;flex:0 0 auto}.toggle-pill::after{content:"";position:absolute;right:4px;top:4px;width:16px;height:16px;border-radius:999px;background:#fff}
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.sidebar-top {
+  flex: 1;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  border-top: 1px solid var(--aiux-border);
+  padding-top: 20px;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sidebar-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+}
+.plan-features {
+  margin-top: 16px;
+}
+
+.plan-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 0;
+  margin: 0;
+
+  list-style: none;
+}
+
+.plan-feature-list li {
+  color: var(--aiux-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.plan-feature-list li::before {
+  content: "✓";
+  color: #7c83ff;
+  font-weight: 700;
+  margin-right: 10px;
+}
 .billing-hero{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:22px;align-items:center}.billing-plan-name{margin:10px 0 0;color:#fff;font-size:44px;line-height:1;font-weight:750}.billing-actions{display:grid;gap:10px}
 
 @media(max-width:1100px){.premium-hero,.premium-auth-page,.app-shell,.app-grid-3,.app-grid-2,.score-shell,.settings-grid,.billing-hero{grid-template-columns:1fr}.auth-side-panel{display:none}.audit-preview-card{max-width:620px}.premium-feature-grid,.premium-plan-grid,.comparison-grid,.client-grid,.score-metric-grid{grid-template-columns:1fr}.app-sidebar{position:relative;height:auto}.report-row,.roadmap-item{grid-template-columns:1fr}}

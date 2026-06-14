@@ -32,7 +32,7 @@ export function BillingCard({ plan, status, periodEnd, stripeCustomerId, compact
           <p className="billing-plan-name">{isLifetime ? 'Pro Lifetime' : isPro ? 'Pro' : 'Free'}</p>
           <p className="mt-3 app-muted">
             {isLifetime
-              ? 'You have lifetime access to AIUX Insight. No billing actions are required.'
+              ? 'Full access to all AIUX Insight capabilities.'
               : isPro
                 ? 'Your Pro subscription is active.'
                 : 'Upgrade to Pro to unlock AI-powered audits, competitor analysis, saved roadmaps, and deeper recommendations.'}
@@ -43,11 +43,18 @@ export function BillingCard({ plan, status, periodEnd, stripeCustomerId, compact
         </div>
 
         <div className="billing-actions">
-          {isLifetime ? (
-            <div className="rounded-xl border border-brand-500 bg-brand-500/10 px-4 py-3 text-sm text-brand-200">
-              Lifetime access is active.
-            </div>
-          ) : isPaidStripeUser ? (
+{isLifetime ? (
+  <div className="plan-features">
+    <ul className="plan-feature-list">
+      <li>Unlimited UX audits</li>
+      <li>Unlimited reports</li>
+      <li>Unlimited roadmaps</li>
+      <li>Unlimited competitor analysis</li>
+      <li>Advanced AI recommendations</li>
+    </ul>
+  </div>
+)          
+ : isPaidStripeUser ? (
             <form action="/api/stripe/portal" method="POST">
               <input type="hidden" name="intent" value="manage" />
               <Button type="submit" className="w-full">Manage Billing</Button>
