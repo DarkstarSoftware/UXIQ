@@ -1,98 +1,85 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { Download } from 'lucide-react';
 
 import { AppShell } from '@/components/layout/app-shell';
-import type { RoadmapResult } from '@/lib/roadmap';
+import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
+import { dbRoadmapToView, type RoadmapItem } from '@/lib/roadmap-engine';
 
-export default async function RoadmapDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+function PhaseSection({ title, items }: { title: string; items: RoadmapItem[] }) {
+  return (
+    <section className="card app-section">
+      <div className="app-toolbar">
+        <div><p className="app-kicker">{title}</p><h2 className="section-title">{items.length} prioritized item{items.length === 1 ? '' : 's'}</h2></div>
+      </div>
+
+      {items.length === 0 ? (
+        <p className="app-muted">No items in this phase.</p>
+      ) : (
+        <div className="roadmap-list">
+          {items.map((item) => (
+            <article key={`${item.priority}-${item.title}`} className="roadmap-item">
+              <span className="roadmap-index">{item.priority}</span>
+              <div>
+                <h3 className="m-0 text-lg font-semibold text-white">{item.title}</h3>
+                <p className="mt-2 app-muted">{item.description}</p>
+                <p className="mt-3 app-muted"><strong>Source issue:</strong> {item.sourceIssue}</p>
+                <p className="mt-2 app-muted"><strong>Success metric:</strong> {item.successMetric}</p>
+              </div>
+              <div className="grid gap-2">
+                <span className="badge badge-pro">{item.category}</span>
+                <span className={item.impact === 'High' ? 'badge badge-high' : item.impact === 'Medium' ? 'badge badge-med' : 'badge badge-low'}>{item.impact} Impact</span>
+                <span className={item.effort === 'Low' ? 'badge badge-low' : item.effort === 'Medium' ? 'badge badge-med' : 'badge badge-high'}>{item.effort} Effort</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+export default async function RoadmapDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { id } = await params;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (!user) redirect(`/auth/login?redirect=/roadmaps/${id}`);
 
-  if (!user) {
-    redirect(`/auth/login?redirect=/roadmaps/${id}`);
-  }
-
-  const { data: roadmapRow } = await supabase
+  const { data } = await supabase
     .from('roadmaps')
-    .select('id, title, summary, roadmap, created_at')
+    .select('*')
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
 
-  if (!roadmapRow) {
-    redirect('/roadmaps');
-  }
+  if (!data) redirect('/roadmaps');
 
-  const roadmap = roadmapRow.roadmap as RoadmapResult;
+  const roadmap = dbRoadmapToView(data);
 
   return (
-    <AppShell title="Roadmap Detail" subtitle="A prioritized action plan based on your audit">
-      <div className="space-y-6">
-        <div className="card p-6">
-          <p className="text-sm uppercase tracking-[0.2em] text-brand-300">
-            Darkstar Roadmap
-          </p>
-          <h2 className="mt-3 text-3xl font-semibold text-white">{roadmap.title}</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-ui-muted">
-            {roadmap.summary}
-          </p>
+    <AppShell
+      title={roadmap.title}
+      subtitle={roadmap.summary}
+      actions={
+        <div className="app-toolbar-actions">
+          {roadmap.auditReportId ? <Link href={`/reports/${roadmap.auditReportId}`}><Button variant="secondary">View Source Report</Button></Link> : null}
+          <Button variant="secondary"><Download className="h-4 w-4" /> Export Plan</Button>
         </div>
-
-        <div className="grid gap-6">
-          {roadmap.phases?.map((phase) => (
-            <div key={phase.name} className="card p-6">
-              <h2 className="section-title">{phase.name}</h2>
-              <p className="mt-2 text-sm text-ui-muted">{phase.goal}</p>
-
-              <div className="mt-5 space-y-3">
-                {phase.tasks?.map((task) => (
-                  <div
-                    key={task.title}
-                    className="rounded-xl border border-ui-border bg-ui-surface/60 p-4"
-                  >
-                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <p className="font-medium text-white">{task.title}</p>
-                        <p className="mt-2 text-sm leading-6 text-ui-muted">{task.why}</p>
-                      </div>
-                      <div className="flex shrink-0 flex-wrap gap-2 text-xs">
-                        <span className="rounded-full border border-success/30 bg-success/10 px-3 py-1 text-success">
-                          Impact: {task.impact}
-                        </span>
-                        <span className="rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-warning">
-                          Effort: {task.effort}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-3 text-sm text-ui-muted md:grid-cols-2">
-                      <p>Owner: {task.owner}</p>
-                      <p>Timeframe: {task.timeframe}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+      }
+    >
+      <section className="card app-section">
+        <div className="app-grid-3">
+          <div className="score-metric-card"><span>Total Items</span><strong>{roadmap.items.length}</strong></div>
+          <div className="score-metric-card"><span>Quick Wins</span><strong>{roadmap.quickWins.length}</strong></div>
+          <div className="score-metric-card"><span>Strategic Items</span><strong>{roadmap.strategicInitiatives.length}</strong></div>
         </div>
+      </section>
 
-        <div className="card p-6">
-          <h2 className="section-title">Executive Notes</h2>
-          <ul className="mt-4 space-y-2 text-sm text-ui-muted">
-            {roadmap.executiveNotes?.map((note) => (
-              <li key={note}>• {note}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <PhaseSection title="Quick Wins" items={roadmap.quickWins} />
+      <PhaseSection title="Next Phase" items={roadmap.nextPhase} />
+      <PhaseSection title="Strategic Initiatives" items={roadmap.strategicInitiatives} />
     </AppShell>
   );
 }
