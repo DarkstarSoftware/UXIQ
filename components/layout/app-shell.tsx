@@ -1,16 +1,23 @@
-import { Sidebar } from '@/components/layout/sidebar';
+import { ReactNode } from 'react';
 
-export function AppShell({
+import { Sidebar } from '@/components/layout/sidebar';
+import { ProfileMenu } from '@/components/layout/profile-menu';
+import { createClient } from '@/lib/supabase/server';
+
+export async function AppShell({
   title,
   subtitle,
-  children,
   actions,
+  children,
 }: {
   title: string;
   subtitle?: string;
-  children: React.ReactNode;
-  actions?: React.ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
 }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <div className="app-shell">
       <Sidebar />
@@ -20,8 +27,13 @@ export function AppShell({
             <h1 className="app-page-title">{title}</h1>
             {subtitle ? <p className="app-page-subtitle">{subtitle}</p> : null}
           </div>
-          {actions ? <div>{actions}</div> : null}
+
+          <div className="app-toolbar-actions">
+            {actions}
+            <ProfileMenu email={user?.email} />
+          </div>
         </header>
+
         {children}
       </main>
     </div>

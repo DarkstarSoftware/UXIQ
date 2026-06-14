@@ -1,8 +1,43 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+
 import { AppShell } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
-const competitors=[['Your Site','nike.com','72','Good, room to improve'],['Competitor 1','adidas.com','79','Better UX in some areas'],['Competitor 2','underarmour.com','63','Friction issues detected']];
-const opportunities=[['Strengthen CTA visibility','Your primary actions need stronger contrast and hierarchy.','High Impact'],['Improve accessibility compliance','Competitors show clearer form labels and focus behavior.','High Impact'],['Simplify navigation','Reduce competing choices and improve wayfinding.','Medium Impact']];
-export default async function CompetitorsPage(){ const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser(); if(!user) redirect('/auth/login?redirect=/competitors'); return <AppShell title="Competitors" subtitle="Compare your UX performance against competitors and find opportunities to win" actions={<Link href="/competitors/new"><Button>Add Comparison</Button></Link>}><section className="card app-section"><div className="app-toolbar"><div><p className="app-kicker">Comparison Set</p><h2 className="section-title">Your site vs competitors</h2></div><Button variant="secondary">Export PDF</Button></div><div className="comparison-grid">{competitors.map(([label,site,score,note],index)=><article key={site} className="comparison-card"><span className="comparison-rank">{index+1}</span><p className="mt-5 app-kicker">{label}</p><h3 className="mt-2 text-xl font-semibold text-white">{site}</h3><p className="comparison-score">{score}</p><p className="app-muted">{note}</p></article>)}</div></section><section className="card app-section"><h2 className="section-title">Top Opportunities</h2><div className="mt-5 grid gap-3">{opportunities.map(([title,copy,impact],index)=><div key={title} className="issue-row"><div className="issue-row-main"><span className="roadmap-index">{index+1}</span><div><p className="issue-row-title">{title}</p><p className="issue-row-copy">{copy}</p></div></div><span className={impact==='High Impact'?'badge badge-high':'badge badge-med'}>{impact}</span></div>)}</div></section></AppShell>; }
+
+export default async function CompetitorsPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/auth/login?redirect=/competitors');
+
+  const { data } = await supabase
+    .from('competitor_comparisons')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  return (
+    <AppShell title="Competitors" subtitle="Compare your UX performance against competing websites" actions={<Link href="/competitors/new"><Button>Add Comparison</Button></Link>}>
+      {!data?.length ? (
+        <section className="card app-section">
+          <h2 className="section-title">No comparisons yet</h2>
+          <p className="mt-3 app-muted">Create a competitor comparison to see how your UX, WCAG, and conversion scores stack up.</p>
+          <div className="mt-6"><Link href="/competitors/new"><Button>Add Comparison</Button></Link></div>
+        </section>
+      ) : (
+        <section className="card app-section">
+          <div className="report-list">
+            {data.map((item) => (
+              <div key={item.id} className="report-row">
+                <div><p className="report-title">{item.name}</p><p className="report-url">{item.primary_url}</p><p className="mt-2 app-muted">{item.results?.summary}</p></div>
+                <div><span className="score-chip">{item.results?.primary?.score ?? '-'}</span></div>
+                <div><p className="app-muted">{new Date(item.created_at).toLocaleDateString()}</p></div>
+                <Link href={`/competitors/${item.id}`}><Button variant="secondary">View</Button></Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </AppShell>
+  );
+}
