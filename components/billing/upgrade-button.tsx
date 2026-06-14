@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+
 import { Button } from '@/components/ui/button';
 
 export function UpgradeButton({ label = 'Upgrade to Pro' }: { label?: string }) {
@@ -16,6 +17,11 @@ export function UpgradeButton({ label = 'Upgrade to Pro' }: { label?: string }) 
       });
 
       const data = await response.json().catch(() => null);
+
+      if (response.status === 401 && data?.redirectTo) {
+        window.location.href = data.redirectTo;
+        return;
+      }
 
       if (!response.ok) {
         alert(data?.error || 'Unable to open Stripe Checkout.');

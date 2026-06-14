@@ -3,17 +3,18 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  BarChart3,
   CreditCard,
   FileText,
   Gauge,
   GitCompare,
+  LogOut,
   Map,
   Settings,
   Users,
 } from 'lucide-react';
 
 import { Logo } from '@/components/ui/logo';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -24,7 +25,6 @@ const navItems = [
   { href: '/clients', label: 'Clients', icon: Users },
   { href: '/billing', label: 'Billing', icon: CreditCard },
   { href: '/settings', label: 'Settings', icon: Settings },
-  { href: '/pricing', label: 'Pricing', icon: BarChart3 },
 ];
 
 export function Sidebar() {
@@ -32,7 +32,7 @@ export function Sidebar() {
 
   return (
     <aside className="app-sidebar">
-      <Logo />
+      <Logo href="/dashboard" />
 
       <nav className="app-nav" aria-label="Application navigation">
         {navItems.map((item) => {
@@ -51,6 +51,13 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <form action="/auth/signout" method="POST" className="mt-8">
+        <Button type="submit" variant="secondary" className="w-full">
+          <LogOut className="h-4 w-4" aria-hidden="true" />
+          Sign Out
+        </Button>
+      </form>
     </aside>
   );
 }
