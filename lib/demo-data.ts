@@ -1,15 +1,21 @@
-export type AuditIssue = { severity:'HIGH'|'MED'|'LOW'; title:string; detail:string; recommendation:string; impact:'High'|'Medium'|'Low'; effort:'High'|'Medium'|'Low' };
-export type DemoReport = { id:string; site:string; url:string; score:number; date:string; summary:string; metrics:{usability:number; accessibility:number; conversion:number; visualDesign:number}; issues:AuditIssue[] };
-export const demoReports: DemoReport[] = [
-{id:'nike-com',site:'Nike.com',url:'https://www.nike.com',score:72,date:'Apr 18, 2026',summary:'Good, but losing conversions. The site has strong brand presence, but the primary path to action can be clearer and more accessible.',metrics:{usability:68,accessibility:54,conversion:61,visualDesign:80},issues:[
-{severity:'HIGH',title:'CTA button lacks contrast',detail:'Primary actions do not stand out strongly enough against surrounding visual elements.',recommendation:'Increase button contrast, strengthen hover/focus states, and reserve the primary style for the most important action.',impact:'High',effort:'Low'},
-{severity:'HIGH',title:'No clear call-to-action above the fold',detail:'The hero area presents multiple competing actions without one dominant next step.',recommendation:'Use one dominant CTA, one secondary action, and a clearer value statement above the fold.',impact:'High',effort:'Medium'},
-{severity:'MED',title:'Form friction is too high',detail:'The conversion path requests more effort than necessary before trust is established.',recommendation:'Reduce optional fields, add helper text, and show progress or reassurance near submission.',impact:'Medium',effort:'Medium'}]},
-{id:'acmecorp-com',site:'AcmeCorp.com',url:'https://www.acmecorp.com',score:58,date:'Apr 13, 2026',summary:'Accessibility and clarity issues are creating friction before users reach the conversion point.',metrics:{usability:61,accessibility:48,conversion:52,visualDesign:68},issues:[
-{severity:'HIGH',title:'Form labels are not persistent',detail:'Some fields rely on placeholder text, which can disappear once the user starts typing.',recommendation:'Add persistent visible labels, helper text, and accessible error messages.',impact:'High',effort:'Low'},
-{severity:'MED',title:'Page hierarchy feels flat',detail:'Headings and cards do not clearly communicate priority.',recommendation:'Use a consistent heading scale and separate primary, secondary, and tertiary actions.',impact:'Medium',effort:'Medium'}]},
-{id:'techstartup-io',site:'TechStartup.io',url:'https://www.techstartup.io',score:83,date:'Apr 5, 2026',summary:'Strong UX foundation with opportunities to improve accessibility polish and funnel clarity.',metrics:{usability:84,accessibility:78,conversion:80,visualDesign:88},issues:[{severity:'MED',title:'Secondary CTAs compete with the primary CTA',detail:'Multiple buttons with similar visual weight create hesitation.',recommendation:'Reduce visual weight of secondary actions and preserve the strongest style for conversion.',impact:'Medium',effort:'Low'}]},
-{id:'shopflow-com',site:'ShopFlow.com',url:'https://www.shopflow.com',score:65,date:'Mar 28, 2026',summary:'Checkout and product comparison friction may be reducing conversion confidence.',metrics:{usability:66,accessibility:60,conversion:57,visualDesign:74},issues:[{severity:'HIGH',title:'Checkout trust signals are weak',detail:'Users may not see enough reassurance near payment and account creation steps.',recommendation:'Add security, returns, shipping, and support cues near key checkout decisions.',impact:'High',effort:'Medium'}]}
+import { buildAuditReportFromUrl, slugFromUrl, type AuditIssue, type AuditReport } from '@/lib/audit-engine';
+
+export type { AuditIssue, AuditReport };
+
+export const demoReports: AuditReport[] = [
+  buildAuditReportFromUrl('https://www.nike.com'),
+  buildAuditReportFromUrl('https://www.acmecorp.com'),
+  buildAuditReportFromUrl('https://www.techstartup.io'),
+  buildAuditReportFromUrl('https://www.shopflow.com'),
 ];
-export function getReportById(id:string){ return demoReports.find(r=>r.id===id) ?? demoReports[0]; }
-export function slugFromUrl(url:string){ try{ const n=url.startsWith('http')?url:`https://${url}`; const h=new URL(n).hostname.replace(/^www\./,''); return h.replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase() || 'audit-report'; }catch{return url.replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-|-$/g,'').toLowerCase() || 'audit-report';} }
+
+export function getReportById(id: string, url?: string) {
+  if (url) return buildAuditReportFromUrl(url);
+
+  return (
+    demoReports.find((report) => report.id === id) ??
+    buildAuditReportFromUrl(`https://${id.replace(/-/g, '.')}`)
+  );
+}
+
+export { buildAuditReportFromUrl, slugFromUrl };

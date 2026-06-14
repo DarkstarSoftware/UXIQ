@@ -1,32 +1,25 @@
-# AI UX Insight — UXIQ Design System Application
+# AIUX Insight — Dynamic Audit Repair
 
-This package applies the uploaded UXIQ-style design system across the site.
+This fixes the issue where entering `powderiq.com` still showed a Nike report.
 
-It updates:
-- Global typography
-- Heading scale
-- Text color hierarchy
-- Indigo primary palette
-- Semantic colors
-- Background/card/border colors
-- Buttons
-- Inputs
-- Cards
-- Score cards
-- Issue rows
-- Sidebar
-- Dashboard
-- Reports
-- Settings
+## What changes
+
+- The audit route now redirects with the submitted URL.
+- Report detail page builds a site-specific audit from the submitted URL.
+- PowderIQ, or any typed domain, appears as the report name.
+- Scores, issues, recommendations, and roadmap are generated from the submitted domain.
+- Roadmap keeps the submitted URL/report context.
+- No forced fallback to Nike unless no URL/report is provided.
+- Dashboard keeps users in flow after analysis.
 
 ## Apply
 
 ```bash
 cd ~/Desktop/uxiq-auth-clean
-unzip ~/Downloads/aiuxinsight-uxiq-design-system-application.zip
+unzip ~/Downloads/aiuxinsight-dynamic-audit-repair.zip
 npm run build
-git add .
-git commit -m "Apply UXIQ design system globally"
+git add app/api/audit/route.ts app/reports/[id]/page.tsx app/roadmaps/page.tsx lib/audit-engine.ts lib/demo-data.ts
+git commit -m "Make audit reports dynamic by submitted URL"
 git push
 ```
 

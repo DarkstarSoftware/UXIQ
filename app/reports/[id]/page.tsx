@@ -1,8 +1,86 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Download, Map } from 'lucide-react';
+
 import { AppShell } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 import { getReportById } from '@/lib/demo-data';
-export default async function ReportDetailPage({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{url?:string}>}){ const supabase=await createClient(); const {data:{user}}=await supabase.auth.getUser(); const {id}=await params; const query=await searchParams; if(!user) redirect(`/auth/login?redirect=/reports/${id}`); const report=getReportById(id); const displayUrl=query.url||report.url; return <AppShell title={report.site} subtitle={`UX audit report for ${displayUrl}`} actions={<div className="app-toolbar-actions"><Link href={`/roadmaps?report=${report.id}`}><Button><Map className="h-4 w-4" /> Generate Roadmap</Button></Link><Button variant="secondary"><Download className="h-4 w-4" /> Export PDF</Button></div>}><section className="card app-section"><div className="score-shell"><div className="score-ring" aria-label={`UX score ${report.score} out of 100`}><div className="score-ring-inner">{report.score}</div></div><div><p className="app-kicker">Report Summary</p><h2 className="mt-3 text-5xl font-semibold tracking-tight text-white">{report.score>=80?'Strong UX foundation.':report.score>=65?'Good, but losing conversions.':'High-priority UX issues found.'}</h2><p className="mt-4 app-muted">{report.summary}</p><div className="score-metric-grid">{[['Usability',report.metrics.usability],['Accessibility',report.metrics.accessibility],['Conversion',report.metrics.conversion],['Visual Design',report.metrics.visualDesign]].map(([label,score])=><div key={label} className="score-metric-card"><span>{label}</span><strong>{score}</strong></div>)}</div></div></div></section><section className="card app-section"><h2 className="section-title">Issues and Recommended Fixes</h2><div className="mt-5 grid gap-3">{report.issues.map(issue=><div key={issue.title} className="issue-row"><div className="issue-row-main"><span className={issue.severity==='HIGH'?'badge badge-high':issue.severity==='MED'?'badge badge-med':'badge badge-low'}>{issue.severity}</span><div><p className="issue-row-title">{issue.title}</p><p className="issue-row-copy">{issue.detail}</p><p className="mt-2 app-muted"><strong>Fix:</strong> {issue.recommendation}</p></div></div><div className="billing-actions"><span className="badge badge-pro">Impact {issue.impact}</span><span className="badge badge-low">Effort {issue.effort}</span></div></div>)}</div></section></AppShell>; }
+
+export default async function ReportDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ url?: string }>;
+}) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { id } = await params;
+  const query = await searchParams;
+
+  if (!user) redirect(`/auth/login?redirect=/reports/${id}`);
+
+  const report = getReportById(id, query.url);
+  const roadmapHref = `/roadmaps?report=${report.id}&url=${encodeURIComponent(report.url)}`;
+
+  return (
+    <AppShell
+      title={report.site}
+      subtitle={`UX audit report for ${report.url}`}
+      actions={
+        <div className="app-toolbar-actions">
+          <Link href={roadmapHref}><Button><Map className="h-4 w-4" /> Generate Roadmap</Button></Link>
+          <Button variant="secondary"><Download className="h-4 w-4" /> Export PDF</Button>
+        </div>
+      }
+    >
+      <section className="card app-section">
+        <div className="score-shell">
+          <div className="score-ring" aria-label={`UX score ${report.score} out of 100`}>
+            <div className="score-ring-inner">{report.score}</div>
+          </div>
+          <div>
+            <p className="app-kicker">Report Summary</p>
+            <h2 className="mt-3 text-5xl font-semibold tracking-tight text-white">
+              {report.score >= 80 ? 'Strong UX foundation.' : report.score >= 65 ? 'Good, but losing conversions.' : 'High-priority UX issues found.'}
+            </h2>
+            <p className="mt-4 app-muted">{report.summary}</p>
+            <div className="score-metric-grid">
+              {[
+                ['Usability', report.metrics.usability],
+                ['Accessibility', report.metrics.accessibility],
+                ['Conversion', report.metrics.conversion],
+                ['Visual Design', report.metrics.visualDesign],
+              ].map(([label, score]) => (
+                <div key={label} className="score-metric-card"><span>{label}</span><strong>{score}</strong></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="card app-section">
+        <h2 className="section-title">Issues and Recommended Fixes</h2>
+        <div className="mt-5 grid gap-3">
+          {report.issues.map((issue) => (
+            <div key={issue.title} className="issue-row">
+              <div className="issue-row-main">
+                <span className={issue.severity === 'HIGH' ? 'badge badge-high' : issue.severity === 'MED' ? 'badge badge-med' : 'badge badge-low'}>{issue.severity}</span>
+                <div>
+                  <p className="issue-row-title">{issue.title}</p>
+                  <p className="issue-row-copy">{issue.detail}</p>
+                  <p className="mt-2 app-muted"><strong>Fix:</strong> {issue.recommendation}</p>
+                </div>
+              </div>
+              <div className="billing-actions">
+                <span className="badge badge-pro">Impact {issue.impact}</span>
+                <span className="badge badge-low">Effort {issue.effort}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </AppShell>
+  );
+}
