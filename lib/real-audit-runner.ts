@@ -48,7 +48,7 @@ export async function runRealAudit(url: string, plan: 'free' | 'pro') {
         recommendations: [...report.recommendations, ...aiRecommendations],
         issues: [
           ...report.issues,
-          ...aiRecommendations.slice(0, 2).map((recommendation, index) => ({
+          ...aiRecommendations.slice(0, 2).map((recommendation: string, index: number) => ({
             severity: index === 0 ? 'HIGH' as const : 'MED' as const,
             title: `AI recommendation: ${recommendation.slice(0, 64)}${recommendation.length > 64 ? '...' : ''}`,
             detail: recommendation,
