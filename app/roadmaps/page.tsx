@@ -4,26 +4,37 @@ import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
-import { getReportById } from '@/lib/demo-data';
+import { buildAuditReportFromUrl, dbReportToAuditReport } from '@/lib/audit-engine';
 
 export default async function RoadmapsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ report?: string; url?: string }>;
+  searchParams: Promise<{ report?: string }>;
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/auth/login?redirect=/roadmaps');
 
   const query = await searchParams;
-  const report = getReportById(query.report || 'audit-report', query.url);
-  const reportHref = `/reports/${report.id}?url=${encodeURIComponent(report.url)}`;
+
+  const { data } = query.report
+    ? await supabase
+        .from('audit_reports')
+        .select('*')
+        .eq('id', query.report)
+        .eq('user_id', user.id)
+        .single()
+    : { data: null };
+
+  const report = data ? dbReportToAuditReport(data) : buildAuditReportFromUrl('https://example.com', 'free');
+  const reportHref = `/reports/${report.id}`;
 
   const roadmapItems = report.issues.map((issue, index) => ({
     title: issue.recommendation,
     copy: `Based on: ${issue.title}. ${issue.detail}`,
     effort: issue.effort,
     impact: issue.impact,
+    category: issue.category,
     index: index + 1,
   }));
 
@@ -44,6 +55,7 @@ export default async function RoadmapsPage({
                 <p className="mt-2 app-muted">{item.copy}</p>
               </div>
               <div className="grid gap-2">
+                <span className="badge badge-pro">{item.category}</span>
                 <span className={item.impact === 'High' ? 'badge badge-high' : item.impact === 'Medium' ? 'badge badge-med' : 'badge badge-low'}>{item.impact} Impact</span>
                 <span className={item.effort === 'Low' ? 'badge badge-low' : item.effort === 'Medium' ? 'badge badge-med' : 'badge badge-high'}>{item.effort} Effort</span>
               </div>
