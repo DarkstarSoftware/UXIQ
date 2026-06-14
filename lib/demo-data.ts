@@ -1,21 +1,29 @@
-import { buildAuditReportFromUrl, slugFromUrl, type AuditIssue, type AuditReport } from '@/lib/audit-engine';
+import { buildRealAuditReport, type AuditIssue, type AuditReport } from '@/lib/real-audit-engine';
 
 export type { AuditIssue, AuditReport };
 
+const demoExtraction = {
+  url: 'https://example.com',
+  finalUrl: 'https://example.com',
+  status: 200,
+  title: 'Example Audit',
+  description: 'Example saved audit report used only when no saved reports exist.',
+  lang: 'en',
+  h1: ['Example Audit'],
+  h2: ['Overview'],
+  h3: [],
+  headings: [{ level: 1, text: 'Example Audit' }, { level: 2, text: 'Overview' }],
+  links: [{ text: 'Start Free Audit', href: 'https://example.com' }],
+  buttons: ['Start Free Audit'],
+  images: [{ alt: 'Example', src: 'https://example.com/example.png' }],
+  forms: [],
+  landmarks: { header: 1, nav: 1, main: 1, footer: 1, aside: 0 },
+  text: 'Example audit report for AIUX Insight.',
+  wordCount: 7,
+  colorPairs: [{ foreground: '#FFFFFF', background: '#4F46E5', usage: 'Primary button text' }],
+};
+
 export const demoReports: AuditReport[] = [
-  buildAuditReportFromUrl('https://www.nike.com', 'free'),
-  buildAuditReportFromUrl('https://www.acmecorp.com', 'free'),
-  buildAuditReportFromUrl('https://www.techstartup.io', 'pro'),
-  buildAuditReportFromUrl('https://www.shopflow.com', 'free'),
+  buildRealAuditReport({ ...demoExtraction, finalUrl: 'https://www.nike.com', url: 'https://www.nike.com', title: 'Nike' }, 'free'),
+  buildRealAuditReport({ ...demoExtraction, finalUrl: 'https://www.techstartup.io', url: 'https://www.techstartup.io', title: 'Tech Startup' }, 'pro'),
 ];
-
-export function getReportById(id: string, url?: string) {
-  if (url) return buildAuditReportFromUrl(url, 'free');
-
-  return (
-    demoReports.find((report) => report.id === id) ??
-    buildAuditReportFromUrl(`https://${id.replace(/-/g, '.')}`, 'free')
-  );
-}
-
-export { buildAuditReportFromUrl, slugFromUrl };

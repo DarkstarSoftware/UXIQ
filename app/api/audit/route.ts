@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
-import { buildAuditReportFromUrl, normalizeAuditUrl, slugFromUrl } from '@/lib/audit-engine';
+import { normalizeAuditUrl, slugFromUrl } from '@/lib/audit-engine';
+import { runRealAudit } from '@/lib/real-audit-runner';
 import { createClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
@@ -13,15 +14,6 @@ async function readUrl(request: Request) {
     return typeof body?.url === 'string' ? body.url : '';
   }
 
-  if (
-    contentType.includes('application/x-www-form-urlencoded') ||
-    contentType.includes('multipart/form-data')
-  ) {
-    const formData = await request.formData().catch(() => null);
-    const url = formData?.get('url');
-    return typeof url === 'string' ? url : '';
-  }
-
   const formData = await request.formData().catch(() => null);
   const url = formData?.get('url');
   return typeof url === 'string' ? url : '';
@@ -31,18 +23,13 @@ export async function POST(request: Request) {
   const rawUrl = await readUrl(request);
   const url = normalizeAuditUrl(rawUrl);
 
-  if (!url) {
-    return NextResponse.json({ error: 'A website URL is required.' }, { status: 400 });
-  }
+  if (!url) return NextResponse.json({ error: 'A website URL is required.' }, { status: 400 });
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json(
-      { error: 'You must be signed in to run an audit.', redirectTo: '/auth/login?redirect=/dashboard' },
-      { status: 401 },
-    );
+    return NextResponse.json({ error: 'You must be signed in to run an audit.', redirectTo: '/auth/login?redirect=/dashboard' }, { status: 401 });
   }
 
   const { data: profile } = await supabase
@@ -51,14 +38,17 @@ export async function POST(request: Request) {
     .eq('id', user.id)
     .single();
 
-  const isPro =
-    profile?.plan === 'pro' ||
-    profile?.subscription_status === 'lifetime' ||
-    profile?.subscription_status === 'active';
-
+  const isPro = profile?.plan === 'pro' || profile?.subscription_status === 'lifetime' || profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing';
   const plan = isPro ? 'pro' : 'free';
-  const audit = buildAuditReportFromUrl(url, plan);
-  const slug = slugFromUrl(url);
+
+  let audit;
+  try {
+    audit = await runRealAudit(url, plan);
+  } catch (error) {
+    return NextResponse.json({
+      error: error instanceof Error ? `Unable to crawl this website: ${error.message}` : 'Unable to crawl this website.',
+    }, { status: 502 });
+  }
 
   const { data: savedReport, error } = await supabase
     .from('audit_reports')
@@ -66,7 +56,7 @@ export async function POST(request: Request) {
       user_id: user.id,
       url: audit.url,
       site_name: audit.site,
-      slug,
+      slug: slugFromUrl(audit.url),
       plan,
       audit_mode: audit.auditMode,
       score: audit.score,
@@ -83,10 +73,7 @@ export async function POST(request: Request) {
     .single();
 
   if (error || !savedReport) {
-    return NextResponse.json(
-      { error: error?.message || 'Unable to save audit report.' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: error?.message || 'Unable to save audit report.' }, { status: 500 });
   }
 
   await supabase
@@ -95,18 +82,8 @@ export async function POST(request: Request) {
     .eq('id', user.id);
 
   const redirectTo = `/reports/${savedReport.id}`;
-
   const accept = request.headers.get('accept') || '';
-  if (accept.includes('text/html')) {
-    return NextResponse.redirect(new URL(redirectTo, request.url), 303);
-  }
+  if (accept.includes('text/html')) return NextResponse.redirect(new URL(redirectTo, request.url), 303);
 
-  return NextResponse.json({
-    ok: true,
-    reportId: savedReport.id,
-    url: audit.url,
-    plan,
-    auditMode: audit.auditMode,
-    redirectTo,
-  });
+  return NextResponse.json({ ok: true, reportId: savedReport.id, url: audit.url, plan, auditMode: audit.auditMode, redirectTo });
 }
