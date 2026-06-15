@@ -17,7 +17,11 @@ export function ReportScreenshotCard({
       </div>
 
       <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/20">
-        <img src={screenshotUrl} alt={`${site} website screenshot`} className="block w-full" />
+        <img
+          src={screenshotUrl}
+          alt={`${site} website screenshot`}
+          className="block w-full"
+        />
       </div>
     </section>
   );

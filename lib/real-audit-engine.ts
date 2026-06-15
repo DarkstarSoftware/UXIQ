@@ -67,6 +67,7 @@ export type AuditReport = {
   wcagChecks: Array<{ criterion: string; status: 'pass' | 'warning' | 'fail'; note: string }>;
   heuristicChecks: Array<{ heuristic: string; status: 'pass' | 'warning' | 'fail'; note: string }>;
   extraction: ExtractedPage;
+  screenshotUrl?: string;
   aiNotes?: string[];
 };
 
@@ -805,6 +806,7 @@ export function dbReportToAuditReport(row: any): AuditReport {
     wcagChecks: row.wcag_checks ?? [],
     heuristicChecks: row.heuristic_checks ?? [],
     extraction: { ...fallbackExtraction, ...(raw.extraction ?? {}) },
+    screenshotUrl: row.screenshot_url ?? raw.screenshotUrl ?? undefined,
     aiNotes: raw.aiNotes ?? [],
   };
 }

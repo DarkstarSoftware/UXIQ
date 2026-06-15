@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Download } from 'lucide-react';
 import { GenerateRoadmapButton } from './generate-roadmap-button';
+import { ReportScreenshotCard } from '@/components/reports/report-screenshot-card';
 import { AppShell } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
@@ -41,6 +42,8 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
         </div>
       }
     >
+      <ReportScreenshotCard screenshotUrl={report.screenshotUrl} site={report.site} />
+
       <section className="card app-section">
         <div className="app-toolbar">
           <div>
