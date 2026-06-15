@@ -1,28 +1,22 @@
-# AIUX Insight — Production UX Features Package
+# AIUX Insight — Screenshot Patch Auto Apply
 
-Adds:
-- Better Settings page
-- Profile/avatar menu + logout
-- BillingCard fix for lifetime vs Stripe users
-- Competitor analysis workflow
-- Supabase competitor table migration
-- CSS additions for avatar menu
+This package removes the need to manually place patches.
 
-Apply:
+It adds:
+- `ReportScreenshotCard`
+- screenshot URL support in `real-audit-engine.ts`
+- screenshot card wiring into `app/reports/[id]/page.tsx`
+
+## Apply
 
 ```bash
 cd ~/Desktop/uxiq-auth-clean
-unzip ~/Downloads/aiuxinsight-production-ux-features.zip
-cat app/globals.append.css >> app/globals.css
-rm app/globals.append.css
+unzip ~/Downloads/aiuxinsight-screenshot-patches-ready.zip
+node scripts/apply-screenshot-patches.mjs
 npm run build
-git add app components lib supabase
-git commit -m "Add production UX settings profile and competitor features"
+git add app components lib scripts
+git commit -m "Wire screenshot support into reports"
 git push
 ```
 
-Run in Supabase SQL editor:
-
-```sql
-supabase/production-ux-features.sql
-```
+If `npm run build` passes, you are good.
