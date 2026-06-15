@@ -1,89 +1,64 @@
 import { buildRealAuditReport, crawlWebsite, type AuditReport } from '@/lib/real-audit-engine';
+import { buildRankings, generateCompetitiveInsights } from '@/lib/competitor-analysis-v2';
 
-function strengths(report: AuditReport) {
-  const list: string[] = [];
+export type CompetitorResult = {
+  site: string;
+  url: string;
+  score: number;
+  metrics: AuditReport['metrics'];
+  strengths: string[];
+  weaknesses: string[];
+};
 
-  if (report.metrics.accessibility >= 80)
-    list.push('Strong accessibility');
+function getStrengths(report: AuditReport) {
+  const strengths: string[] = [];
 
-  if (report.metrics.conversion >= 80)
-    list.push('Strong conversion path');
+  if (report.metrics.accessibility >= 80) strengths.push('Strong accessibility structure');
+  if (report.metrics.conversion >= 80) strengths.push('Strong conversion path');
+  if (report.metrics.usability >= 80) strengths.push('Strong usability foundation');
+  if (report.extraction.h1.length === 1) strengths.push('Clear primary heading');
+  if (report.extraction.buttons.length > 0) strengths.push('Detectable action buttons');
 
-  if (report.extraction.h1.length === 1)
-    list.push('Clear heading hierarchy');
+  if (!strengths.length) strengths.push('Baseline page structure detected');
 
-  if (report.extraction.buttons.length > 0)
-    list.push('Visible CTAs');
-
-  return list.slice(0, 4);
+  return strengths.slice(0, 5);
 }
 
-function weaknesses(report: AuditReport) {
-  return report.issues.slice(0, 4).map(issue => issue.title);
+function getWeaknesses(report: AuditReport) {
+  return report.issues.slice(0, 5).map((issue) => issue.title);
 }
 
-function buildRankings(results: any[]) {
+function buildGapAnalysis(primary: CompetitorResult, leader: CompetitorResult) {
   return {
-    overall: [...results].sort((a,b)=>b.score-a.score),
-    accessibility: [...results].sort(
-      (a,b)=>b.metrics.accessibility-a.metrics.accessibility
-    ),
-    conversion: [...results].sort(
-      (a,b)=>b.metrics.conversion-a.metrics.conversion
-    ),
-    usability: [...results].sort(
-      (a,b)=>b.metrics.usability-a.metrics.usability
-    ),
+    overall: (leader.score ?? 0) - (primary.score ?? 0),
+    accessibility: (leader.metrics.accessibility ?? 0) - (primary.metrics.accessibility ?? 0),
+    conversion: (leader.metrics.conversion ?? 0) - (primary.metrics.conversion ?? 0),
+    usability: (leader.metrics.usability ?? 0) - (primary.metrics.usability ?? 0),
+    visualDesign: (leader.metrics.visualDesign ?? 0) - (primary.metrics.visualDesign ?? 0),
   };
 }
 
-export async function runCompetitorComparison(
-  primaryUrl:string,
-  competitorUrls:string[]
-) {
-  const urls = [
-    primaryUrl,
-    ...competitorUrls.filter(Boolean)
-  ].slice(0,4);
+export async function runCompetitorComparison(primaryUrl: string, competitorUrls: string[]) {
+  const urls = [primaryUrl, ...competitorUrls.filter(Boolean)].slice(0, 4);
 
   const reports = await Promise.all(
-    urls.map(async url =>
-      buildRealAuditReport(
-        await crawlWebsite(url),
-        'pro'
-      )
-    )
+    urls.map(async (url) => buildRealAuditReport(await crawlWebsite(url), 'pro')),
   );
 
-  const results = reports.map(report => ({
+  const results: CompetitorResult[] = reports.map((report) => ({
     site: report.site,
     url: report.url,
     score: report.score,
     metrics: report.metrics,
-    strengths: strengths(report),
-    weaknesses: weaknesses(report),
+    strengths: getStrengths(report),
+    weaknesses: getWeaknesses(report),
   }));
 
   const rankings = buildRankings(results);
-
   const primary = results[0];
-
-  const leader = rankings.overall[0];
-
-  const gapAnalysis = {
-    overall: leader.score - primary.score,
-    accessibility:
-      leader.metrics.accessibility -
-      primary.metrics.accessibility,
-
-    conversion:
-      leader.metrics.conversion -
-      primary.metrics.conversion,
-
-    usability:
-      leader.metrics.usability -
-      primary.metrics.usability,
-  };
+  const leader = rankings.overall[0] ?? primary;
+  const gapAnalysis = buildGapAnalysis(primary, leader);
+  const insights = generateCompetitiveInsights(results);
 
   return {
     primary,
@@ -92,12 +67,7 @@ export async function runCompetitorComparison(
     rankings,
     leader,
     gapAnalysis,
-
-    summary:
-      `${primary.site} ranks #${
-        rankings.overall.findIndex(
-          x => x.url === primary.url
-        ) + 1
-      } of ${results.length} websites analyzed.`,
+    insights,
+    summary: insights.summary,
   };
 }

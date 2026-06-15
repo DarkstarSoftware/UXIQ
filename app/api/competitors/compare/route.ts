@@ -20,12 +20,16 @@ export async function POST(request: Request) {
     formData.get('competitorThree')?.toString() || '',
   ].filter(Boolean);
 
-  if (!primaryUrl || competitorUrls.length === 0) return NextResponse.redirect(`${siteUrl}/competitors/new?error=missing`, 303);
+  if (!primaryUrl || competitorUrls.length === 0) {
+    return NextResponse.redirect(`${siteUrl}/competitors/new?error=missing`, 303);
+  }
 
   let comparison;
+
   try {
     comparison = await runCompetitorComparison(primaryUrl, competitorUrls);
-  } catch {
+  } catch (error) {
+    console.error('Competitor comparison failed:', error);
     return NextResponse.redirect(`${siteUrl}/competitors/new?error=crawl`, 303);
   }
 
@@ -37,11 +41,15 @@ export async function POST(request: Request) {
       primary_url: comparison.primary.url,
       competitor_urls: competitorUrls,
       results: comparison,
+      summary: comparison.insights,
     })
     .select('id')
     .single();
 
-  if (error || !data) return NextResponse.redirect(`${siteUrl}/competitors/new?error=save`, 303);
+  if (error || !data) {
+    console.error('Competitor comparison save failed:', error);
+    return NextResponse.redirect(`${siteUrl}/competitors/new?error=save`, 303);
+  }
 
   return NextResponse.redirect(`${siteUrl}/competitors/${data.id}`, 303);
 }
