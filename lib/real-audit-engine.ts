@@ -221,7 +221,7 @@ function detectCtas(links: ExtractedPage['links'], buttons: string[]) {
 }
 
 function detectTrustSignals(text: string) {
-  const signals = [
+  const signals: Array<[string, RegExp]> = [
     ['testimonial', /testimonial|review|rated|stars|customer story/i],
     ['security', /secure|security|privacy|encrypted|compliance|gdpr|soc 2|hipaa/i],
     ['social proof', /trusted by|customers|teams|companies|users|clients/i],
@@ -230,7 +230,9 @@ function detectTrustSignals(text: string) {
     ['pricing clarity', /pricing|plans|subscription|monthly|annually|free trial/i],
   ];
 
-  return signals.filter(([, regex]) => regex.test(text)).map(([label]) => label);
+  return signals
+    .filter(([, regex]) => regex.test(text))
+    .map(([label]) => label);
 }
 
 function status(pass: boolean, fail = false): 'pass' | 'warning' | 'fail' {
