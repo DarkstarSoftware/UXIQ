@@ -56,8 +56,8 @@ export async function runCompetitorComparison(primaryUrl: string, competitorUrls
 
   const rankings = buildRankings(results);
   const primary = results[0];
-  const leader = rankings.overall[0] ?? primary;
-  const gapAnalysis = buildGapAnalysis(primary, leader);
+  const leader = (rankings.overall[0] ?? primary) as CompetitorResult;
+const gapAnalysis = buildGapAnalysis(primary, leader);
   const insights = generateCompetitiveInsights(results);
 
   return {

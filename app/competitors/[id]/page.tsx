@@ -94,7 +94,14 @@ export default async function CompetitorDetailPage({ params }: { params: Promise
   const gaps = results.gapAnalysis ?? {};
   const largestGap = getLargestGap(gaps);
 
-  const position = insights.position ?? rankings?.overall?.findIndex((site: any) => site.url === sites?.[0]?.url) + 1 || 1;
+  const calculatedPosition =
+  (rankings?.overall?.findIndex(
+    (site: any) => site.url === sites?.[0]?.url
+  ) ?? -1) + 1;
+
+const position =
+  insights.position ??
+  (calculatedPosition > 0 ? calculatedPosition : 1);
 
   return (
     <AppShell title={data.name} subtitle={results.summary ?? 'Competitor comparison results'}>
