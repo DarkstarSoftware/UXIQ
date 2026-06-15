@@ -27,6 +27,13 @@ h1,h2,h3,h4,h5,h6{color:var(--aiux-text);letter-spacing:-.035em} p{margin-top:0}
 .ds-button-primary:hover{background:linear-gradient(180deg,#7b82ff 0%,#4338ca 100%)}
 .ds-button-secondary{background:linear-gradient(180deg,rgba(55,65,81,.94),rgba(31,41,55,.94));border-color:var(--aiux-border);color:var(--aiux-text-soft);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
 .ds-button-secondary:hover{background:linear-gradient(180deg,rgba(75,85,99,.94),rgba(45,55,72,.94))}.ds-button-danger{background:linear-gradient(180deg,var(--aiux-error),#b91c1c);border-color:rgba(252,165,165,.55)}
+.dashboard-metrics {
+  margin-top: 3rem;
+}
+
+.app-stat {
+  padding: 1.75rem;
+}
 .aiux-logo,.ai-logo{display:inline-flex;align-items:center;gap:12px}.aiux-logo-mark,.ai-logo-mark{width:40px;height:40px;display:grid;place-items:center;border-radius:11px;background:linear-gradient(135deg,#7c83ff 0%,#3b82f6 100%);color:#fff;font-size:13px;font-weight:800;box-shadow:0 16px 38px rgba(59,130,246,.32)}
 .aiux-logo-title,.ai-logo-title{display:block;color:#fff;font-size:17px;line-height:1.05;font-weight:750;letter-spacing:-.02em}.aiux-logo-subtitle,.ai-logo-subtitle{display:block;margin-top:4px;color:#818cf8;font-size:11px;font-weight:750;letter-spacing:.18em;text-transform:uppercase}
 .ai-input,.ai-textarea,.premium-input{width:100%;min-height:44px;border:1px solid var(--aiux-border);border-radius:9px;background:linear-gradient(180deg,rgba(55,65,81,.78),rgba(31,41,55,.86));color:var(--aiux-text);padding:12px 14px;box-shadow:var(--shadow-control)}

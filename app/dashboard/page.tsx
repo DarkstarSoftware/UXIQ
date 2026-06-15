@@ -117,7 +117,8 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <div className="app-grid-3 mt-5">
+      <section className="dashboard-metrics">
+  <div className="app-grid-3">
         <div className="card app-stat">
           <p className="app-stat-label">Current plan</p>
           <p className="app-stat-value">{plan}</p>
@@ -136,6 +137,7 @@ export default async function DashboardPage() {
           <p className="app-muted">Roadmaps turn findings into prioritized action plans.</p>
         </div>
       </div>
+</section>
 
       <section className="card app-section">
         <div className="app-toolbar">
