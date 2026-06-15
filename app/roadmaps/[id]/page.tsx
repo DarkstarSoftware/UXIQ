@@ -7,11 +7,23 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 import { dbRoadmapToView, type RoadmapItem } from '@/lib/roadmap-engine';
 
-function PhaseSection({ title, items }: { title: string; items: RoadmapItem[] }) {
+function PhaseSection({
+  title,
+  description,
+  items,
+}: {
+  title: string;
+  description: string;
+  items: RoadmapItem[];
+}) {
   return (
     <section className="card app-section">
       <div className="app-toolbar">
-        <div><p className="app-kicker">{title}</p><h2 className="section-title">{items.length} prioritized item{items.length === 1 ? '' : 's'}</h2></div>
+        <div>
+          <p className="app-kicker">{title}</p>
+          <h2 className="section-title">{items.length} prioritized item{items.length === 1 ? '' : 's'}</h2>
+          <p className="mt-2 app-muted">{description}</p>
+        </div>
       </div>
 
       {items.length === 0 ? (
@@ -64,22 +76,41 @@ export default async function RoadmapDetailPage({ params }: { params: Promise<{ 
       subtitle={roadmap.summary}
       actions={
         <div className="app-toolbar-actions">
-          {roadmap.auditReportId ? <Link href={`/reports/${roadmap.auditReportId}`}><Button variant="secondary">View Source Report</Button></Link> : null}
+          {roadmap.auditReportId ? (
+            <Link href={`/reports/${roadmap.auditReportId}`}><Button variant="secondary">View Source Report</Button></Link>
+          ) : null}
           <Button variant="secondary"><Download className="h-4 w-4" /> Export Plan</Button>
         </div>
       }
     >
       <section className="card app-section">
         <div className="app-grid-3">
-          <div className="score-metric-card"><span>Total Items</span><strong>{roadmap.items.length}</strong></div>
+          <div className="score-metric-card"><span>Total Items</span><strong>{roadmap.items.length || roadmap.quickWins.length + roadmap.nextPhase.length + roadmap.strategicInitiatives.length}</strong></div>
           <div className="score-metric-card"><span>Quick Wins</span><strong>{roadmap.quickWins.length}</strong></div>
-          <div className="score-metric-card"><span>Strategic Items</span><strong>{roadmap.strategicInitiatives.length}</strong></div>
+          <div className="score-metric-card"><span>90 Day Items</span><strong>{roadmap.ninetyDay.length}</strong></div>
         </div>
       </section>
 
-      <PhaseSection title="Quick Wins" items={roadmap.quickWins} />
-      <PhaseSection title="Next Phase" items={roadmap.nextPhase} />
-      <PhaseSection title="Strategic Initiatives" items={roadmap.strategicInitiatives} />
+      <PhaseSection
+        title="Quick Wins"
+        description="High-impact, low-effort improvements to tackle first."
+        items={roadmap.quickWins}
+      />
+      <PhaseSection
+        title="30 Days"
+        description="High-impact work that needs a little more design or implementation effort."
+        items={roadmap.thirtyDay}
+      />
+      <PhaseSection
+        title="60 Days"
+        description="Medium-priority improvements that build on the quick wins."
+        items={roadmap.sixtyDay}
+      />
+      <PhaseSection
+        title="90 Days"
+        description="Larger strategic initiatives that may require planning, design, and engineering coordination."
+        items={roadmap.ninetyDay}
+      />
     </AppShell>
   );
 }
