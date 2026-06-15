@@ -1,0 +1,19 @@
+In app/reports/[id]/page.tsx, replace the Export PDF button:
+
+<Button variant="secondary">
+  <Download className="h-4 w-4" /> Export PDF
+</Button>
+
+with:
+
+<Link href={`/api/reports/${report.id}/pdf`}>
+  <Button variant="secondary">
+    <Download className="h-4 w-4" /> Export PDF
+  </Button>
+</Link>
+
+If Link is not imported, add:
+
+import Link from 'next/link';
+
+at the top of the file.
