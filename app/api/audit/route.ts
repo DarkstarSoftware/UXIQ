@@ -2,20 +2,14 @@ import { NextResponse } from 'next/server';
 
 import { normalizeAuditUrl, slugFromUrl } from '@/lib/audit-engine';
 import { runRealAudit } from '@/lib/real-audit-runner';
-import { captureWebsiteWithPlaywright } from '@/lib/playwright-crawler';
-import { uploadAuditScreenshot } from '@/lib/screenshot-storage';
 import { createClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
   return NextResponse.json(
-    {
-      error: 'Use POST to run an audit.',
-    },
-    {
-      status: 405,
-    },
+    { error: 'Use POST to run an audit.' },
+    { status: 405 },
   );
 }
 
@@ -39,10 +33,39 @@ async function maybeCaptureScreenshot(url: string) {
   }
 
   try {
+    const { captureWebsiteWithPlaywright } = await import('@/lib/playwright-crawler');
     const capture = await captureWebsiteWithPlaywright(url);
     return capture.screenshot;
   } catch (error) {
     console.error('Playwright screenshot capture failed:', error);
+    return null;
+  }
+}
+
+async function maybeUploadScreenshot({
+  userId,
+  reportId,
+  url,
+  screenshot,
+}: {
+  userId: string;
+  reportId: string;
+  url: string;
+  screenshot: Buffer | null;
+}) {
+  if (!screenshot) return null;
+
+  try {
+    const { uploadAuditScreenshot } = await import('@/lib/screenshot-storage');
+
+    return await uploadAuditScreenshot({
+      userId,
+      reportId,
+      url,
+      screenshot,
+    });
+  } catch (error) {
+    console.error('Screenshot upload failed:', error);
     return null;
   }
 }
@@ -54,12 +77,8 @@ export async function POST(request: Request) {
 
     if (!url) {
       return NextResponse.json(
-        {
-          error: 'A website URL is required.',
-        },
-        {
-          status: 400,
-        },
+        { error: 'A website URL is required.' },
+        { status: 400 },
       );
     }
 
@@ -75,9 +94,7 @@ export async function POST(request: Request) {
           error: 'You must be signed in to run an audit.',
           redirectTo: '/auth/login?redirect=/dashboard',
         },
-        {
-          status: 401,
-        },
+        { status: 401 },
       );
     }
 
@@ -110,11 +127,9 @@ export async function POST(request: Request) {
           error:
             error instanceof Error
               ? error.message
-              : 'Unable to crawl website',
+              : 'Unable to crawl website.',
         },
-        {
-          status: 500,
-        },
+        { status: 500 },
       );
     }
 
@@ -144,41 +159,30 @@ export async function POST(request: Request) {
       console.error('Audit save failed:', saveError);
 
       return NextResponse.json(
-        {
-          error: saveError?.message ?? 'Unable to save audit report.',
-        },
-        {
-          status: 500,
-        },
+        { error: saveError?.message ?? 'Unable to save audit report.' },
+        { status: 500 },
       );
     }
 
-    let screenshotUrl: string | null = null;
+    const screenshotUrl = await maybeUploadScreenshot({
+      userId: user.id,
+      reportId: savedReport.id,
+      url: audit.url,
+      screenshot,
+    });
 
-    if (screenshot) {
-      screenshotUrl = await uploadAuditScreenshot({
-        userId: user.id,
-        reportId: savedReport.id,
-        url: audit.url,
-        screenshot,
-      });
-
-      if (screenshotUrl) {
-        await supabase
-          .from('audit_reports')
-          .update({
-            screenshot_url: screenshotUrl,
-          })
-          .eq('id', savedReport.id)
-          .eq('user_id', user.id);
-      }
+    if (screenshotUrl) {
+      await supabase
+        .from('audit_reports')
+        .update({ screenshot_url: screenshotUrl })
+        .eq('id', savedReport.id)
+        .eq('user_id', user.id);
     }
 
     await supabase
       .from('profiles')
       .update({
-        audits_this_month:
-          (profile?.audits_this_month ?? 0) + 1,
+        audits_this_month: (profile?.audits_this_month ?? 0) + 1,
       })
       .eq('id', user.id);
 
@@ -196,11 +200,9 @@ export async function POST(request: Request) {
         error:
           error instanceof Error
             ? error.message
-            : 'Unexpected audit error',
+            : 'Unexpected audit error.',
       },
-      {
-        status: 500,
-      },
+      { status: 500 },
     );
   }
 }
