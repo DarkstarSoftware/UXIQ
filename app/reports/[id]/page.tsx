@@ -1,6 +1,6 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { Download } from 'lucide-react';
-
 import { GenerateRoadmapButton } from './generate-roadmap-button';
 import { AppShell } from '@/components/layout/app-shell';
 import { Button } from '@/components/ui/button';
@@ -33,9 +33,11 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
         <div className="app-toolbar-actions">
           <GenerateRoadmapButton reportId={report.id} />
 
-          <Button variant="secondary">
-            <Download className="h-4 w-4" /> Export PDF
-          </Button>
+         <Link href={`/api/reports/${report.id}/pdf`}>
+  <Button variant="secondary">
+    <Download className="h-4 w-4" /> Export PDF
+  </Button>
+</Link>
         </div>
       }
     >
