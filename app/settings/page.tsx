@@ -27,19 +27,20 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan, subscription_status, subscription_current_period_end, full_name, company, role')
+    .select('plan, subscription_status, full_name, company, role')
     .eq('id', user.id)
     .single();
 
   const planLabel = getBillingPlanLabel(profile?.plan, profile?.subscription_status);
   const planPrice = getBillingPlanPrice(profile?.plan, profile?.subscription_status);
   const planDescription = getBillingPlanDescription(profile?.plan, profile?.subscription_status);
+  const initial = (user.email?.[0] ?? 'U').toUpperCase();
 
   return (
     <AppShell title="Settings" subtitle="Manage your profile, subscription, audit defaults, and report preferences">
       <div className="settings-grid">
         <div className="settings-stack">
-          <section className="card app-section">
+          <section className="card app-section premium-settings-card">
             <div className="app-toolbar">
               <div>
                 <p className="app-kicker">Profile</p>
@@ -48,44 +49,36 @@ export default async function SettingsPage() {
               <UserCircle className="h-7 w-7 text-brand-300" aria-hidden="true" />
             </div>
 
-            <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-              <div className="flex items-center gap-4">
-                <div className="grid h-14 w-14 place-items-center rounded-full bg-brand-500 text-xl font-semibold text-white">
-                  {(user.email?.[0] ?? 'U').toUpperCase()}
-                </div>
-                <div>
-                  <p className="issue-row-title">Profile photo</p>
-                  <p className="issue-row-copy">Avatar upload will be available soon.</p>
-                </div>
+            <div className="premium-profile-photo-row">
+              <div className="premium-profile-avatar">{initial}</div>
+              <div>
+                <p className="issue-row-title">Profile photo</p>
+                <p className="issue-row-copy">Avatar upload will be available soon.</p>
               </div>
             </div>
 
-            <div className="mt-5 form-grid">
+            <div className="mt-6 form-grid">
               <label>
                 <span className="form-label">Full name</span>
                 <input className="ai-input" value={profile?.full_name ?? 'Todd Fleury'} readOnly />
               </label>
-
               <label>
                 <span className="form-label">Email</span>
                 <input className="ai-input" value={user.email ?? ''} readOnly />
               </label>
-
               <label>
                 <span className="form-label">Company</span>
                 <input className="ai-input" value={profile?.company ?? 'AIUX Insight'} readOnly />
               </label>
-
               <label>
                 <span className="form-label">Role</span>
                 <input className="ai-input" value={profile?.role ?? 'Founder, Designer, Product Lead'} readOnly />
               </label>
-
               <Button>Save Profile</Button>
             </div>
           </section>
 
-          <section className="card app-section">
+          <section className="card app-section premium-settings-card">
             <div className="app-toolbar">
               <div>
                 <p className="app-kicker">Audit Preferences</p>
@@ -94,7 +87,7 @@ export default async function SettingsPage() {
               <ShieldCheck className="h-7 w-7 text-brand-300" aria-hidden="true" />
             </div>
 
-            <div className="mt-5 form-grid">
+            <div className="mt-6 form-grid">
               <label>
                 <span className="form-label">Default audit focus</span>
                 <select className="ai-input" defaultValue="full">
@@ -103,7 +96,6 @@ export default async function SettingsPage() {
                   <option value="accessibility">Accessibility focused</option>
                 </select>
               </label>
-
               <label>
                 <span className="form-label">Default WCAG level</span>
                 <select className="ai-input" defaultValue="aa">
@@ -111,30 +103,29 @@ export default async function SettingsPage() {
                   <option value="aaa">WCAG AAA</option>
                 </select>
               </label>
-
               <Button>Save Audit Preferences</Button>
             </div>
           </section>
         </div>
 
         <div className="settings-stack">
-          <section className="card app-section">
+          <section className="card app-section premium-settings-card">
             <p className="app-kicker">Subscription</p>
             <h2 className="section-title">Current Plan</h2>
 
-            <div className="mt-5 issue-row">
+            <div className="premium-current-plan-card">
               <div>
-                <p className="issue-row-title">{planLabel}</p>
-                <p className="issue-row-copy">{planPrice} · {planDescription}</p>
+                <span className="badge badge-pro">{planLabel}</span>
+                <p className="premium-current-plan-title">{planPrice}</p>
+                <p className="app-muted">{planDescription}</p>
               </div>
-
               <Link href="/billing">
                 <Button>Manage Billing</Button>
               </Link>
             </div>
           </section>
 
-          <section className="card app-section">
+          <section className="card app-section premium-settings-card">
             <div className="app-toolbar">
               <div>
                 <p className="app-kicker">Reports</p>
@@ -142,15 +133,14 @@ export default async function SettingsPage() {
               </div>
               <FileText className="h-7 w-7 text-brand-300" aria-hidden="true" />
             </div>
-
-            <div className="mt-5">
+            <div className="mt-6">
               <PreferenceRow title="PDF exports" copy="Include score, findings, roadmap, and recommendations." />
               <PreferenceRow title="Executive summary" copy="Show a client-ready summary at the top of every report." />
               <PreferenceRow title="Branding" copy="Use saved company details in reports when available." />
             </div>
           </section>
 
-          <section className="card app-section">
+          <section className="card app-section premium-settings-card">
             <div className="app-toolbar">
               <div>
                 <p className="app-kicker">Notifications</p>
@@ -158,8 +148,7 @@ export default async function SettingsPage() {
               </div>
               <Bell className="h-7 w-7 text-brand-300" aria-hidden="true" />
             </div>
-
-            <div className="mt-5">
+            <div className="mt-6">
               <PreferenceRow title="Audit complete" copy="Email me when a long-running audit finishes." />
               <PreferenceRow title="Weekly summary" copy="Send a weekly summary of new reports and roadmap progress." />
               <PreferenceRow title="Product updates" copy="Notify me about new AIUX Insight features." />

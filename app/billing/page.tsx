@@ -25,20 +25,32 @@ export default async function BillingPage() {
         stripeCustomerId={profile?.stripe_customer_id}
       />
 
-      <section className="card app-section">
-        <h2 className="section-title">Plan Includes</h2>
-        <div className="mt-5 app-grid-3">
-          <div className="score-metric-card">
-            <span>Real UX audits</span>
-            <p className="mt-3 app-muted">Crawl websites and analyze structure, accessibility, and conversion hierarchy.</p>
+      <section className="card app-section premium-includes-section">
+        <div className="premium-section-heading">
+          <p className="app-kicker">Plan Includes</p>
+          <h2 className="section-title">Everything needed to turn UX issues into action.</h2>
+          <p className="app-muted">
+            Use AIUX Insight to find issues, prioritize work, benchmark competitors, and create client-ready deliverables.
+          </p>
+        </div>
+
+        <div className="premium-includes-grid">
+          <div className="premium-include-card">
+            <span>01</span>
+            <h3>Real UX audits</h3>
+            <p>Crawl websites and analyze structure, accessibility, usability, and conversion hierarchy.</p>
           </div>
-          <div className="score-metric-card">
-            <span>Roadmaps</span>
-            <p className="mt-3 app-muted">Turn audit findings into prioritized UX action plans.</p>
+
+          <div className="premium-include-card">
+            <span>02</span>
+            <h3>Roadmaps</h3>
+            <p>Turn audit findings into prioritized UX action plans your team can actually execute.</p>
           </div>
-          <div className="score-metric-card">
-            <span>Competitors</span>
-            <p className="mt-3 app-muted">Compare your site against competing digital experiences.</p>
+
+          <div className="premium-include-card">
+            <span>03</span>
+            <h3>Competitors</h3>
+            <p>Compare your site against competing experiences to identify gaps and opportunities.</p>
           </div>
         </div>
       </section>

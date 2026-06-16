@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { CheckCircle2, Minus } from 'lucide-react';
+import { CheckCircle2, Minus, Sparkles } from 'lucide-react';
 
 import { UpgradeButton } from '@/components/billing/upgrade-button';
 import { Button } from '@/components/ui/button';
@@ -8,10 +8,10 @@ import { Logo } from '@/components/ui/logo';
 import { createClient } from '@/lib/supabase/server';
 
 const plans = [
-  { id: 'free', name: 'Free', price: '$0', description: 'Basic validation for trying AIUX Insight.', badge: null, featured: false, cta: null },
-  { id: 'monthly', name: 'Pro Monthly', price: '$9.99/mo', description: 'Flexible access to the full product.', badge: 'Most flexible', featured: false, cta: 'Start Monthly' },
-  { id: 'annual', name: 'Pro Annual', price: '$99.99/yr', description: 'Best value for ongoing UX optimization.', badge: 'Most popular', featured: true, cta: 'Start Annual' },
-  { id: 'lifetime', name: 'Lifetime', price: '$299.99', description: 'Founder access with no recurring payment.', badge: 'Founder Deal', featured: false, cta: 'Get Lifetime' },
+  { id: 'free', name: 'Free', price: '$0', period: '', description: 'Basic validation for trying AIUX Insight.', badge: null, featured: false, cta: 'Get Started Free' },
+  { id: 'monthly', name: 'Pro Monthly', price: '$9.99', period: '/mo', description: 'Flexible access to the full product.', badge: 'Most flexible', featured: false, cta: 'Start Monthly' },
+  { id: 'annual', name: 'Pro Annual', price: '$99.99', period: '/yr', description: 'Best value for ongoing UX optimization.', badge: 'Most popular', featured: true, cta: 'Start Annual' },
+  { id: 'lifetime', name: 'Lifetime', price: '$299.99', period: '', description: 'Founder access with no recurring payment.', badge: 'Founder Deal', featured: false, cta: 'Get Lifetime' },
 ] as const;
 
 const featureRows = [
@@ -34,7 +34,7 @@ function PlanButton({ plan }: { plan: typeof plans[number] }) {
     );
   }
 
-  return <UpgradeButton label={plan.cta ?? 'Upgrade'} plan={plan.id} />;
+  return <UpgradeButton label={plan.cta} plan={plan.id} />;
 }
 
 function FeatureValue({ value }: { value: boolean }) {
@@ -78,40 +78,65 @@ export default async function PricingPage() {
         </div>
       </header>
 
-      <section className="premium-shell premium-section">
-        <div className="premium-section-heading centered">
+      <section className="premium-shell premium-section premium-pricing-shell">
+        <div className="premium-section-heading centered premium-pricing-hero">
           <p className="premium-eyebrow">Pricing</p>
-          <h1 className="text-5xl font-semibold tracking-tight text-white">UX audits without agency pricing.</h1>
-          <p>Most UX audits cost thousands. AIUX Insight helps you find accessibility, usability, conversion, and competitor opportunities starting at $9.99/month.</p>
+          <h1 className="text-5xl font-semibold tracking-tight text-white">
+            UX audits without agency pricing.
+          </h1>
+          <p>
+            Most UX audits cost thousands. AIUX Insight helps you find accessibility,
+            usability, conversion, and competitor opportunities starting at $9.99/month.
+          </p>
         </div>
 
-        <div className="premium-plan-grid">
+        <div className="premium-pricing-grid">
           {plans.map((plan) => (
-            <article key={plan.id} className={plan.featured ? 'premium-plan-card featured' : 'premium-plan-card'}>
+            <article key={plan.id} className={plan.featured ? 'premium-pricing-card featured' : 'premium-pricing-card'}>
               <div className="plan-card-topline">
                 <p className="mini-label">{plan.name}</p>
                 {plan.badge ? <span className="status-pill">{plan.badge}</span> : null}
               </div>
-              <h3>{plan.price}</h3>
-              <p>{plan.description}</p>
-              <div className="mt-6"><PlanButton plan={plan} /></div>
+
+              <div className="premium-pricing-price">
+                <span>{plan.price}</span>
+                {plan.period ? <small>{plan.period}</small> : null}
+              </div>
+
+              <p className="premium-pricing-copy">{plan.description}</p>
+
+              {plan.featured ? (
+                <div className="premium-pricing-callout">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  <span>Best for founders, consultants, and product teams running ongoing audits.</span>
+                </div>
+              ) : null}
+
+              <PlanButton plan={plan} />
             </article>
           ))}
         </div>
 
-        <section className="card app-section pricing-comparison">
+        <section className="card app-section premium-pricing-comparison">
           <div className="premium-section-heading">
             <p className="premium-eyebrow">Compare Plans</p>
             <h2 className="section-title">Choose the plan that fits your workflow.</h2>
+            <p className="app-muted">
+              Free is for quick validation. Pro unlocks the full audit-to-roadmap-to-report workflow.
+            </p>
           </div>
 
-          <div className="pricing-table">
-            <div className="pricing-table-row pricing-table-head">
-              <div>Feature</div><div>Free</div><div>Monthly</div><div>Annual</div><div>Lifetime</div>
+          <div className="premium-pricing-table">
+            <div className="premium-pricing-table-row premium-pricing-table-head">
+              <div>Feature</div>
+              <div>Free</div>
+              <div>Monthly</div>
+              <div>Annual</div>
+              <div>Lifetime</div>
             </div>
 
             {featureRows.map(([feature, free, monthly, annual, lifetime]) => (
-              <div key={feature as string} className="pricing-table-row">
+              <div key={feature as string} className="premium-pricing-table-row">
                 <div>{feature}</div>
                 <div><FeatureValue value={Boolean(free)} /></div>
                 <div><FeatureValue value={Boolean(monthly)} /></div>

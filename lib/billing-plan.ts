@@ -3,11 +3,7 @@ export type BillingPlanKey = 'free' | 'monthly' | 'annual' | 'lifetime';
 export function getBillingPlanKey(plan?: string | null, status?: string | null): BillingPlanKey {
   if (plan === 'pro_lifetime' || status === 'lifetime') return 'lifetime';
   if (plan === 'pro_annual') return 'annual';
-
-  if (plan === 'pro' || status === 'active' || status === 'trialing') {
-    return 'monthly';
-  }
-
+  if (plan === 'pro' || status === 'active' || status === 'trialing') return 'monthly';
   return 'free';
 }
 
