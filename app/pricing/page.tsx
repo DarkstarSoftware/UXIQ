@@ -1,29 +1,49 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Minus } from 'lucide-react';
 
 import { UpgradeButton } from '@/components/billing/upgrade-button';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/ui/logo';
 import { createClient } from '@/lib/supabase/server';
 
-const freeFeatures = [
-  'Basic UX score',
-  'Top usability findings',
-  'Basic WCAG-aware observations',
-  'One quick audit summary',
+const plans = [
+  { id: 'free', name: 'Free', price: '$0', description: 'Basic validation for trying AIUX Insight.', badge: null, featured: false, cta: null },
+  { id: 'monthly', name: 'Pro Monthly', price: '$9.99/mo', description: 'Flexible access to the full product.', badge: 'Most flexible', featured: false, cta: 'Start Monthly' },
+  { id: 'annual', name: 'Pro Annual', price: '$99.99/yr', description: 'Best value for ongoing UX optimization.', badge: 'Most popular', featured: true, cta: 'Start Annual' },
+  { id: 'lifetime', name: 'Lifetime', price: '$299.99', description: 'Founder access with no recurring payment.', badge: 'Founder Deal', featured: false, cta: 'Get Lifetime' },
+] as const;
+
+const featureRows = [
+  ['Real UX audits', true, true, true, true],
+  ['WCAG-aware checks', true, true, true, true],
+  ['Nielsen Norman heuristics', true, true, true, true],
+  ['Saved report history', false, true, true, true],
+  ['Roadmap generation', false, true, true, true],
+  ['Competitor analysis', false, true, true, true],
+  ['PDF exports', false, true, true, true],
+  ['AI-powered recommendations', false, true, true, true],
 ];
 
-const proFeatures = [
-  'Full AI-powered UX audit',
-  'WCAG 2.2 AA-oriented accessibility review',
-  'Conversion recommendations',
-  'Impact and effort ratings',
-  'Saved audit history',
-  'Competitor comparison',
-  'Roadmap generator',
-  'Client-ready report views',
-];
+function PlanButton({ plan }: { plan: typeof plans[number] }) {
+  if (plan.id === 'free') {
+    return (
+      <Link href="/auth/signup">
+        <Button variant="secondary" className="w-full">Get Started Free</Button>
+      </Link>
+    );
+  }
+
+  return <UpgradeButton label={plan.cta ?? 'Upgrade'} plan={plan.id} />;
+}
+
+function FeatureValue({ value }: { value: boolean }) {
+  return value ? (
+    <CheckCircle2 className="h-5 w-5 text-emerald-400" aria-hidden="true" />
+  ) : (
+    <Minus className="h-5 w-5 text-slate-500" aria-hidden="true" />
+  );
+}
 
 export default async function PricingPage() {
   const supabase = await createClient();
@@ -53,9 +73,7 @@ export default async function PricingPage() {
         <div className="premium-shell premium-nav-inner">
           <Logo href="/" />
           <nav className="premium-nav-links" aria-label="Pricing navigation">
-            <Link href="/dashboard">
-              <Button variant="secondary">Dashboard</Button>
-            </Link>
+            <Link href="/dashboard"><Button variant="secondary">Dashboard</Button></Link>
           </nav>
         </div>
       </header>
@@ -63,102 +81,46 @@ export default async function PricingPage() {
       <section className="premium-shell premium-section">
         <div className="premium-section-heading centered">
           <p className="premium-eyebrow">Pricing</p>
-          <h1 className="text-5xl font-semibold tracking-tight text-white">
-            Start free. Upgrade when you need full AI intelligence.
-          </h1>
-          <p>
-            Free users get basic UX, WCAG, and Nielsen Norman heuristic checks. Pro users unlock
-            AI-powered findings, saved reports, roadmaps, competitor analysis, and PDF exports.
-          </p>
+          <h1 className="text-5xl font-semibold tracking-tight text-white">UX audits without agency pricing.</h1>
+          <p>Most UX audits cost thousands. AIUX Insight helps you find accessibility, usability, conversion, and competitor opportunities starting at $9.99/month.</p>
         </div>
 
         <div className="premium-plan-grid">
-          <article className="premium-plan-card">
-            <p className="mini-label">Free</p>
-            <h3>$0</h3>
-            <p>Basic audit insights for quick validation.</p>
-
-            <ul>
-              {freeFeatures.map((feature) => (
-                <li key={feature}>
-                  <CheckCircle2 aria-hidden="true" /> {feature}
-                </li>
-              ))}
-            </ul>
-
-            <Link href="/auth/signup">
-              <Button variant="secondary" className="w-full">
-                Get Started Free
-              </Button>
-            </Link>
-          </article>
-
-          <article className="premium-plan-card">
-            <div className="plan-card-topline">
-              <p className="mini-label">Pro Monthly</p>
-              <span className="status-pill">Most flexible</span>
-            </div>
-
-            <h3>$9.99/mo</h3>
-            <p>Full AI-powered UX, accessibility, and conversion reports.</p>
-
-            <ul>
-              {proFeatures.map((feature) => (
-                <li key={feature}>
-                  <CheckCircle2 aria-hidden="true" /> {feature}
-                </li>
-              ))}
-            </ul>
-
-            <UpgradeButton label="Start Monthly" plan="monthly" />
-          </article>
-
-          <article className="premium-plan-card featured">
-            <div className="plan-card-topline">
-              <p className="mini-label">Pro Annual</p>
-              <span className="status-pill">Best value</span>
-            </div>
-
-            <h3>$99.99/yr</h3>
-            <p>Save with annual billing and unlock the full Pro workflow.</p>
-
-            <ul>
-              {proFeatures.map((feature) => (
-                <li key={feature}>
-                  <CheckCircle2 aria-hidden="true" /> {feature}
-                </li>
-              ))}
-              <li>
-                <CheckCircle2 aria-hidden="true" /> Best value for ongoing UX optimization
-              </li>
-            </ul>
-
-            <UpgradeButton label="Start Annual" plan="annual" />
-          </article>
-
-          <article className="premium-plan-card">
-            <div className="plan-card-topline">
-              <p className="mini-label">Lifetime</p>
-              <span className="status-pill">Founder&apos;s deal</span>
-            </div>
-
-            <h3>$299.99</h3>
-            <p>Pay once and keep access to AIUX Insight forever.</p>
-
-            <ul>
-              {proFeatures.map((feature) => (
-                <li key={feature}>
-                  <CheckCircle2 aria-hidden="true" /> {feature}
-                </li>
-              ))}
-              <li>
-                <CheckCircle2 aria-hidden="true" /> Lifetime product updates
-              </li>
-            </ul>
-
-            <UpgradeButton label="Get Lifetime Access" plan="lifetime" />
-          </article>
+          {plans.map((plan) => (
+            <article key={plan.id} className={plan.featured ? 'premium-plan-card featured' : 'premium-plan-card'}>
+              <div className="plan-card-topline">
+                <p className="mini-label">{plan.name}</p>
+                {plan.badge ? <span className="status-pill">{plan.badge}</span> : null}
+              </div>
+              <h3>{plan.price}</h3>
+              <p>{plan.description}</p>
+              <div className="mt-6"><PlanButton plan={plan} /></div>
+            </article>
+          ))}
         </div>
+
+        <section className="card app-section pricing-comparison">
+          <div className="premium-section-heading">
+            <p className="premium-eyebrow">Compare Plans</p>
+            <h2 className="section-title">Choose the plan that fits your workflow.</h2>
+          </div>
+
+          <div className="pricing-table">
+            <div className="pricing-table-row pricing-table-head">
+              <div>Feature</div><div>Free</div><div>Monthly</div><div>Annual</div><div>Lifetime</div>
+            </div>
+
+            {featureRows.map(([feature, free, monthly, annual, lifetime]) => (
+              <div key={feature as string} className="pricing-table-row">
+                <div>{feature}</div>
+                <div><FeatureValue value={Boolean(free)} /></div>
+                <div><FeatureValue value={Boolean(monthly)} /></div>
+                <div><FeatureValue value={Boolean(annual)} /></div>
+                <div><FeatureValue value={Boolean(lifetime)} /></div>
+              </div>
+            ))}
+          </div>
+        </section>
       </section>
     </main>
   );

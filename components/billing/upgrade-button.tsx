@@ -16,7 +16,6 @@ export function UpgradeButton({
   return (
     <form action="/api/stripe/checkout" method="POST" className={className}>
       <input type="hidden" name="plan" value={plan} />
-
       <Button type="submit" className="w-full">
         {label}
       </Button>

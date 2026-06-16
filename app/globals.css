@@ -125,3 +125,54 @@ h1,h2,h3,h4,h5,h6{color:var(--aiux-text);letter-spacing:-.035em} p{margin-top:0}
 .profile-menu-item{display:flex;align-items:center;gap:10px;border-radius:10px;padding:10px 10px;color:var(--aiux-muted);font-weight:650}
 .profile-menu-item:hover{background:rgba(148,163,184,.12);color:#fff}
 .profile-settings-row{display:flex;align-items:center;gap:16px;border:1px solid var(--aiux-border);border-radius:14px;background:rgba(31,41,55,.72);padding:16px}
+.billing-upgrade-featured {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.billing-secondary-plans {
+  display: grid;
+  gap: 1rem;
+}
+
+.pricing-comparison {
+  margin-top: 2rem;
+}
+
+.pricing-table {
+  margin-top: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 1rem;
+}
+
+.pricing-table-row {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(4, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.pricing-table-row:last-child {
+  border-bottom: 0;
+}
+
+.pricing-table-head {
+  color: #fff;
+  font-weight: 700;
+  background: rgba(255,255,255,.04);
+}
+
+@media (max-width: 900px) {
+  .billing-upgrade-featured {
+    grid-template-columns: 1fr;
+  }
+
+  .pricing-table-row {
+    grid-template-columns: 1fr;
+  }
+}

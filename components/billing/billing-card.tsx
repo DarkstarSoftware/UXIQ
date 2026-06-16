@@ -1,6 +1,7 @@
 import { UpgradeButton } from '@/components/billing/upgrade-button';
 import { Button } from '@/components/ui/button';
 import {
+  getBillingPlanDescription,
   getBillingPlanKey,
   getBillingPlanLabel,
   getBillingPlanPrice,
@@ -17,22 +18,31 @@ type BillingCardProps = {
 };
 
 const proFeatures = [
-  'Unlimited UX audits',
-  'Saved reports',
+  'Unlimited real UX audits',
+  'Saved report history',
   'Roadmap generation',
   'Competitor analysis',
   'PDF exports',
-  'Advanced AI recommendations',
+  'AI-powered recommendations',
 ];
 
 function formatDate(value?: string | null) {
   if (!value) return null;
-
   return new Date(value).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric',
   });
+}
+
+function PlanFeatureList() {
+  return (
+    <ul className="plan-feature-list">
+      {proFeatures.map((feature) => (
+        <li key={feature}>{feature}</li>
+      ))}
+    </ul>
+  );
 }
 
 export function BillingCard({
@@ -45,108 +55,116 @@ export function BillingCard({
   const planKey = getBillingPlanKey(plan, status);
   const planLabel = getBillingPlanLabel(plan, status);
   const planPrice = getBillingPlanPrice(plan, status);
+  const planDescription = getBillingPlanDescription(plan, status);
   const lifetime = isLifetimePlan(plan, status);
   const paidPlan = isPaidPlan(plan, status);
   const isStripeSubscription = paidPlan && !lifetime && Boolean(stripeCustomerId);
   const formattedPeriodEnd = formatDate(periodEnd);
+
+  if (paidPlan) {
+    return (
+      <section className="card app-section">
+        <div className="app-toolbar">
+          <div>
+            <p className="app-kicker">Subscription</p>
+            <h2 className="section-title">Plan & Billing</h2>
+          </div>
+          <span className="badge badge-pro">{planLabel}</span>
+        </div>
+
+        <div className={compact ? 'settings-stack' : 'billing-hero'}>
+          <div>
+            <p className="app-muted">Current plan</p>
+            <p className="billing-plan-name">{planLabel}</p>
+            <p className="mt-2 app-muted">{planPrice}</p>
+            <p className="mt-3 app-muted">{planDescription}</p>
+
+            {formattedPeriodEnd && isStripeSubscription ? (
+              <p className="mt-3 app-muted">Current billing period ends {formattedPeriodEnd}.</p>
+            ) : null}
+
+            <div className="mt-6 plan-features">
+              <PlanFeatureList />
+            </div>
+          </div>
+
+          <div className="billing-actions">
+            {lifetime ? (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                <p className="issue-row-title">Lifetime access active</p>
+                <p className="mt-2 app-muted">No recurring billing. Future product updates are included.</p>
+              </div>
+            ) : isStripeSubscription ? (
+              <form action="/api/stripe/portal" method="POST">
+                <input type="hidden" name="intent" value="manage" />
+                <Button type="submit" className="w-full">
+                  Manage Billing
+                </Button>
+              </form>
+            ) : (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                <p className="issue-row-title">Billing portal unavailable</p>
+                <p className="mt-2 app-muted">Stripe customer not found for this account.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="card app-section">
       <div className="app-toolbar">
         <div>
           <p className="app-kicker">Subscription</p>
-          <h2 className="section-title">Plan & Billing</h2>
-        </div>
-
-        <span className={paidPlan ? 'badge badge-pro' : 'badge badge-low'}>
-          {planLabel}
-        </span>
-      </div>
-
-      <div className={compact ? 'settings-stack' : 'billing-hero'}>
-        <div>
-          <p className="app-muted">Current plan</p>
-
-          <p className="billing-plan-name">{planLabel}</p>
-
-          <p className="mt-2 app-muted">{planPrice}</p>
-
-          <p className="mt-3 app-muted">
-            {lifetime
-              ? 'You have founder lifetime access with no recurring billing.'
-              : paidPlan
-                ? `${planLabel} is active. Manage your subscription in the Stripe billing portal.`
-                : 'Upgrade to unlock AI-powered audits, roadmaps, competitor analysis, PDF exports, and advanced recommendations.'}
+          <h2 className="section-title">Upgrade Your UX Intelligence</h2>
+          <p className="mt-2 app-muted">
+            Unlock AI-powered audits, roadmaps, competitor analysis, PDF exports, and advanced recommendations.
           </p>
-
-          {formattedPeriodEnd && isStripeSubscription ? (
-            <p className="mt-2 app-muted">
-              Current billing period ends {formattedPeriodEnd}.
-            </p>
-          ) : null}
-
-          {paidPlan ? (
-            <div className="plan-features mt-5">
-              <ul className="plan-feature-list">
-                {proFeatures.map((feature) => (
-                  <li key={feature}>{feature}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
         </div>
-
-        <div className="billing-actions">
-          {lifetime ? (
-            <div className="plan-features">
-              <ul className="plan-feature-list">
-                <li>Lifetime access included</li>
-                <li>No recurring subscription</li>
-                <li>Future product updates included</li>
-              </ul>
-            </div>
-          ) : isStripeSubscription ? (
-            <form action="/api/stripe/portal" method="POST">
-              <input type="hidden" name="intent" value="manage" />
-              <Button type="submit" className="w-full">
-                Manage Billing
-              </Button>
-            </form>
-          ) : paidPlan ? (
-            <div className="rounded-xl border border-ui-border px-4 py-3 text-sm text-ui-muted">
-              Stripe customer not found. Contact support if billing management is needed.
-            </div>
-          ) : (
-            <div className="grid gap-3">
-              <UpgradeButton label="Start Monthly — $9.99/mo" plan="monthly" />
-              <UpgradeButton label="Start Annual — $99.99/yr" plan="annual" />
-<UpgradeButton label="Get Lifetime — $299.99" plan="lifetime" />
-            </div>
-          )}
-        </div>
+        <span className="badge badge-low">Free</span>
       </div>
 
-      {!paidPlan ? (
-        <div className="mt-6 app-grid-3">
+      <div className="mt-6 billing-upgrade-featured">
+        <div className="premium-plan-card featured">
+          <div className="plan-card-topline">
+            <p className="mini-label">Recommended</p>
+            <span className="status-pill">Best value</span>
+          </div>
+
+          <h3>$99.99/yr</h3>
+          <p>Best for ongoing UX optimization. Save compared to monthly billing.</p>
+
+          <div className="mt-5 plan-features">
+            <PlanFeatureList />
+          </div>
+
+          <div className="mt-6">
+            <UpgradeButton label="Start Annual Plan" plan="annual" />
+          </div>
+        </div>
+
+        <div className="billing-secondary-plans">
           <div className="score-metric-card">
             <span>Monthly</span>
             <strong>$9.99</strong>
-            <p className="mt-2 app-muted">Flexible monthly access.</p>
-          </div>
-
-          <div className="score-metric-card">
-            <span>Annual</span>
-            <strong>$99.99</strong>
-            <p className="mt-2 app-muted">Best value for ongoing UX optimization.</p>
+            <p className="mt-2 app-muted">Flexible access.</p>
+            <div className="mt-4">
+              <UpgradeButton label="Start Monthly" plan="monthly" />
+            </div>
           </div>
 
           <div className="score-metric-card">
             <span>Lifetime</span>
             <strong>$299.99</strong>
-            <p className="mt-2 app-muted">Founder access with no recurring payment.</p>
+            <p className="mt-2 app-muted">Founder access. Pay once.</p>
+            <div className="mt-4">
+              <UpgradeButton label="Get Lifetime" plan="lifetime" />
+            </div>
           </div>
         </div>
-      ) : null}
+      </div>
     </section>
   );
 }

@@ -18,18 +18,28 @@ export default async function BillingPage() {
 
   return (
     <AppShell title="Billing" subtitle="Manage your AIUX Insight subscription and plan access">
-      <BillingCard plan={profile?.plan} status={profile?.subscription_status} periodEnd={profile?.subscription_current_period_end} stripeCustomerId={profile?.stripe_customer_id} />
+      <BillingCard
+        plan={profile?.plan}
+        status={profile?.subscription_status}
+        periodEnd={profile?.subscription_current_period_end}
+        stripeCustomerId={profile?.stripe_customer_id}
+      />
 
       <section className="card app-section">
         <h2 className="section-title">Plan Includes</h2>
         <div className="mt-5 app-grid-3">
-          {[
-            ['Real UX audits', 'Crawl websites and analyze structure, accessibility, and conversion hierarchy.'],
-            ['Roadmaps', 'Turn audit findings into prioritized UX action plans.'],
-            ['Competitors', 'Compare your site against competing experiences.'],
-          ].map(([title, copy]) => (
-            <div key={title} className="score-metric-card"><span>{title}</span><p className="mt-3 app-muted">{copy}</p></div>
-          ))}
+          <div className="score-metric-card">
+            <span>Real UX audits</span>
+            <p className="mt-3 app-muted">Crawl websites and analyze structure, accessibility, and conversion hierarchy.</p>
+          </div>
+          <div className="score-metric-card">
+            <span>Roadmaps</span>
+            <p className="mt-3 app-muted">Turn audit findings into prioritized UX action plans.</p>
+          </div>
+          <div className="score-metric-card">
+            <span>Competitors</span>
+            <p className="mt-3 app-muted">Compare your site against competing digital experiences.</p>
+          </div>
         </div>
       </section>
     </AppShell>
