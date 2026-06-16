@@ -6,18 +6,20 @@ type UpgradeButtonProps = {
   label?: string;
   plan?: CheckoutPlan;
   className?: string;
+  variant?: 'default' | 'secondary' | 'ghost';
 };
 
 export function UpgradeButton({
   label = 'Upgrade to Pro',
   plan = 'monthly',
   className,
+  variant = 'default',
 }: UpgradeButtonProps) {
   return (
     <form action="/api/stripe/checkout" method="POST" className={className}>
       <input type="hidden" name="plan" value={plan} />
 
-      <Button type="submit" className="w-full">
+      <Button type="submit" variant={variant} className="w-full">
         {label}
       </Button>
     </form>
