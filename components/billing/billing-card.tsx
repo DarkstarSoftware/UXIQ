@@ -119,8 +119,8 @@ export function BillingCard({
           ) : (
             <div className="grid gap-3">
               <UpgradeButton label="Start Monthly — $9.99/mo" plan="monthly" />
-              <UpgradeButton label="Start Annual — $99.99/yr" plan="annual" variant="secondary" />
-              <UpgradeButton label="Get Lifetime — $299.99" plan="lifetime" variant="secondary" />
+              <UpgradeButton label="Start Annual — $99.99/yr" plan="annual" />
+<UpgradeButton label="Get Lifetime — $299.99" plan="lifetime" />
             </div>
           )}
         </div>
