@@ -27,9 +27,7 @@ const proFeatures = [
 
 export default async function PricingPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (user) {
     const { data: profile } = await supabase
@@ -40,6 +38,8 @@ export default async function PricingPage() {
 
     const isPro =
       profile?.plan === 'pro' ||
+      profile?.plan === 'pro_annual' ||
+      profile?.plan === 'pro_lifetime' ||
       profile?.subscription_status === 'active' ||
       profile?.subscription_status === 'trialing' ||
       profile?.subscription_status === 'lifetime';
@@ -67,8 +67,8 @@ export default async function PricingPage() {
             Start free. Upgrade when you need full AI intelligence.
           </h1>
           <p>
-            Free users get WCAG and Nielsen Norman heuristic checks. Pro users unlock AI-powered findings,
-            saved report history, and deeper recommendations.
+            Free users get basic UX, WCAG, and Nielsen Norman heuristic checks. Pro users unlock
+            AI-powered findings, saved reports, roadmaps, competitor analysis, and PDF exports.
           </p>
         </div>
 
@@ -77,29 +77,86 @@ export default async function PricingPage() {
             <p className="mini-label">Free</p>
             <h3>$0</h3>
             <p>Basic audit insights for quick validation.</p>
+
             <ul>
               {freeFeatures.map((feature) => (
-                <li key={feature}><CheckCircle2 aria-hidden="true" /> {feature}</li>
+                <li key={feature}>
+                  <CheckCircle2 aria-hidden="true" /> {feature}
+                </li>
               ))}
             </ul>
+
             <Link href="/auth/signup">
-              <Button variant="secondary" className="w-full">Get Started Free</Button>
+              <Button variant="secondary" className="w-full">
+                Get Started Free
+              </Button>
             </Link>
+          </article>
+
+          <article className="premium-plan-card">
+            <div className="plan-card-topline">
+              <p className="mini-label">Pro Monthly</p>
+              <span className="status-pill">Most flexible</span>
+            </div>
+
+            <h3>$9.99/mo</h3>
+            <p>Full AI-powered UX, accessibility, and conversion reports.</p>
+
+            <ul>
+              {proFeatures.map((feature) => (
+                <li key={feature}>
+                  <CheckCircle2 aria-hidden="true" /> {feature}
+                </li>
+              ))}
+            </ul>
+
+            <UpgradeButton label="Start Monthly" plan="monthly" />
           </article>
 
           <article className="premium-plan-card featured">
             <div className="plan-card-topline">
-              <p className="mini-label">Pro</p>
+              <p className="mini-label">Pro Annual</p>
               <span className="status-pill">Best value</span>
             </div>
-            <h3>$29/mo</h3>
-            <p>Full AI-powered UX, accessibility, and conversion reports.</p>
+
+            <h3>$99.99/yr</h3>
+            <p>Save with annual billing and unlock the full Pro workflow.</p>
+
             <ul>
               {proFeatures.map((feature) => (
-                <li key={feature}><CheckCircle2 aria-hidden="true" /> {feature}</li>
+                <li key={feature}>
+                  <CheckCircle2 aria-hidden="true" /> {feature}
+                </li>
               ))}
+              <li>
+                <CheckCircle2 aria-hidden="true" /> Best value for ongoing UX optimization
+              </li>
             </ul>
-            <UpgradeButton label="Start Pro Checkout" />
+
+            <UpgradeButton label="Start Annual" plan="annual" />
+          </article>
+
+          <article className="premium-plan-card">
+            <div className="plan-card-topline">
+              <p className="mini-label">Lifetime</p>
+              <span className="status-pill">Founder&apos;s deal</span>
+            </div>
+
+            <h3>$299.99</h3>
+            <p>Pay once and keep access to AIUX Insight forever.</p>
+
+            <ul>
+              {proFeatures.map((feature) => (
+                <li key={feature}>
+                  <CheckCircle2 aria-hidden="true" /> {feature}
+                </li>
+              ))}
+              <li>
+                <CheckCircle2 aria-hidden="true" /> Lifetime product updates
+              </li>
+            </ul>
+
+            <UpgradeButton label="Get Lifetime Access" plan="lifetime" />
           </article>
         </div>
       </section>
