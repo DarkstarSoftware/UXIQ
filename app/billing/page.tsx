@@ -36,19 +36,16 @@ export default async function BillingPage() {
 
         <div className="premium-includes-grid">
           <div className="premium-include-card">
-            <span>01</span>
             <h3>Real UX audits</h3>
             <p>Crawl websites and analyze structure, accessibility, usability, and conversion hierarchy.</p>
           </div>
 
           <div className="premium-include-card">
-            <span>02</span>
             <h3>Roadmaps</h3>
             <p>Turn audit findings into prioritized UX action plans your team can actually execute.</p>
           </div>
 
           <div className="premium-include-card">
-            <span>03</span>
             <h3>Competitors</h3>
             <p>Compare your site against competing experiences to identify gaps and opportunities.</p>
           </div>

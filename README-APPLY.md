@@ -1,22 +1,14 @@
-# AIUX Insight — Screenshot Patch Auto Apply
+# AIUX Insight — Typography Refinement
 
-This package removes the need to manually place patches.
-
-It adds:
-- `ReportScreenshotCard`
-- screenshot URL support in `real-audit-engine.ts`
-- screenshot card wiring into `app/reports/[id]/page.tsx`
+This package replaces `app/globals.css` and softens heavy H3/pricing typography across Billing, Settings, and Pricing.
 
 ## Apply
 
 ```bash
 cd ~/Desktop/uxiq-auth-clean
-unzip ~/Downloads/aiuxinsight-screenshot-patches-ready.zip
-node scripts/apply-screenshot-patches.mjs
+unzip ~/Downloads/aiuxinsight-typography-refinement.zip
 npm run build
-git add app components lib scripts
-git commit -m "Wire screenshot support into reports"
+git add app/globals.css
+git commit -m "Refine premium typography weights"
 git push
 ```
-
-If `npm run build` passes, you are good.
